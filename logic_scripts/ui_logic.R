@@ -40,7 +40,7 @@ ui <- fluidPage(
         fluidRow(
          # placeholder,
           radioButtons(
-            "RNA_exprs_anno", "Colour annotation:", 
+            "RNA_exprs_anno", "Colour annotation:",
             choices = c(
               "Population" = 1,
               "Stage" = 2,
@@ -50,7 +50,7 @@ ui <- fluidPage(
       ),
 
       ### ATAC panel code ###
-      tabPanel("ATAC", 
+      tabPanel("ATAC",
         # Stats row
         fluidRow(
           column(8, h3("Differential accessibility analysis:")),
@@ -70,7 +70,7 @@ ui <- fluidPage(
         fluidRow(
         #  placeholder,
           radioButtons(
-            "ATAC_exprs_anno", "Colour annotation:", 
+            "ATAC_exprs_anno", "Colour annotation:",
             choices = c(
               "Population" = 1,
               "Stage" = 2,
