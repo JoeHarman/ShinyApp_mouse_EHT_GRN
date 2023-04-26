@@ -1,6 +1,7 @@
 library(shiny)
 library(shinymanager)
 library(tidyverse)
+library(edgeR)
 
 # Set up user passwords
 credentials <- data.frame(
@@ -28,6 +29,23 @@ ATAC_stats <- readRDS("./data/ATAC_stats.rds") %>%
 RNA_stats <- readRDS("./data/RNA_stats.rds") %>%
   mutate_at(c(2, 4, 6, 8, 10), function(x) round(x, 2)) %>%
   mutate_at(c(3, 5, 7, 9, 11), function(x) signif(x, 3))
+
+samples <- unique(RNA_exprs$Group)
+names(samples) <- samples
+
+# Colour schemes
+gg_color_hue <- function(n) {
+  hues = seq(15, 375, length = n + 1)
+  hcl(h = hues, l = 65, c = 100)[1:n]
+}
+
+col_scheme <- list(
+  Population = c(EC = "#4444c0", HE = "#53bf53", 
+    proHSC = "#daa84c", preI = "#c34747", preII = "#843b3b"),
+  Stage = c(E8 = "#4444c0", E9 = "#53bf53", E10 = "#c34747"),
+  Group = gg_color_hue(length(unique(ATAC_exprs$Group)))
+)
+names(col_scheme$Group) <- unique(ATAC_exprs$Group)
 
 # Load ui and server scripts
 ui <- source("./logic_scripts/ui_logic.R",  local = TRUE)$value
