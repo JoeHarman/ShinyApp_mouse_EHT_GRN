@@ -37,3 +37,9 @@ vignettes/*.pdf
 
 # R Environment Variables
 .Renviron
+
+# data
+*.rds
+
+# User specific
+misc_scripts.R
