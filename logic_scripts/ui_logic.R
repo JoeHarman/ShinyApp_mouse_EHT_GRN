@@ -12,7 +12,8 @@ ui <- fluidPage(
     ##### SIDE BAR CODE #####
     sidebarPanel(
       checkboxGroupInput("select_groups", "Samples to plot:", samples,
-      selected = samples[c(1, 2, 4, 5, 8, 9)]),
+        selected = samples[c(1, 2, 4, 5, 8, 9)]),
+      actionButton(inputId = "subsetSamples", label = "Subset samples"),
     width = 2),
 
     ##### MAIN PANEL CODE #####

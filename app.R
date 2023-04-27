@@ -45,6 +45,10 @@ ATAC_exprs_wide <- ATAC_exprs[, c(2, 5, 9)] %>%
   reshape2::dcast(peak_coord ~ Sample) %>%
   column_to_rownames("peak_coord")
 
+RNA_anno <- unique(RNA_exprs[, -c(1, 6)])
+RNA_anno$Sample <- gsub(".5", "", RNA_anno$Sample)
+ATAC_anno <- unique(ATAC_exprs[, c(5:8, 10)])
+
 # Colour schemes
 gg_color_hue <- function(n) {
   hues <- seq(15, 375, length = n + 1)

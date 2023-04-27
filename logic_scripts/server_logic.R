@@ -5,8 +5,66 @@ function(input, output, session) {
     check_credentials = check_credentials(credentials)
   )
 
-    updateSelectizeInput(session, "enhancer",
-      choices = unique(ATAC_exprs$peak_coord), server = TRUE)
+  updateSelectizeInput(session, "enhancer",
+    choices = unique(ATAC_exprs$peak_coord), server = TRUE)
+
+  data <- eventReactive(input$subsetSamples, {
+
+    ### Init list
+    processedData <- list()
+
+    ### Process RNA expression data
+    processedData$RNA_exprs <- filter(
+      RNA_exprs, Group %in% unlist(input$select_groups))
+
+    ### Process ATAC expression data
+    processedData$ATAC_exprs <- filter(
+      ATAC_exprs, Group %in% unlist(input$select_groups))
+
+    ### Calculate RNA PCA
+
+    RNA_exprs_wide_filt <- RNA_exprs_wide[,
+      grepl(paste(unlist(input$select_groups), collapse = "|"),
+      colnames(RNA_exprs_wide))]
+
+    vsd <- varianceStabilizingTransformation(round(
+      as.matrix(RNA_exprs_wide_filt)))
+    #rv <- rowVars(vsd)
+    #select <- order(rv, decreasing = TRUE)[seq_len(min(200, length(rv)))]
+
+    RNA_pca <- prcomp(t(vsd)) #[select, ]))
+    RNA_pca$x <- data.frame(RNA_pca$x[, 1:2]) %>%
+      rownames_to_column("Sample") %>%
+      left_join(RNA_anno)
+    RNA_pca$rotation <- data.frame(RNA_pca$rotation[, 1:2]) %>%
+      rownames_to_column("GeneID")
+
+    processedData$RNA_pca <- RNA_pca
+
+    ### Calculate ATAC PCA
+
+    ATAC_exprs_wide_filt <- ATAC_exprs_wide[,
+      grepl(paste(unlist(input$select_groups), collapse = "|"),
+      colnames(ATAC_exprs_wide))]
+
+    vsd <- varianceStabilizingTransformation(round(
+      as.matrix(na.omit(ATAC_exprs_wide_filt))))
+    #rv <- rowVars(vsd)
+    #select <- order(rv, decreasing = TRUE)[seq_len(min(200, length(rv)))]
+
+    ATAC_pca <- prcomp(t(vsd)) #[select, ]))
+    ATAC_pca$x <- data.frame(ATAC_pca$x[, 1:2]) %>%
+      rownames_to_column("Sample") %>%
+      left_join(ATAC_anno)
+    ATAC_pca$rotation <- data.frame(ATAC_pca$rotation[, 1:2]) %>%
+      rownames_to_column("peak_coord")
+
+    processedData$ATAC_pca <- ATAC_pca
+
+    ### Return data
+
+    return(processedData)
+  })
 
   # RNA data table
   output$RNA_stats_tbl <- DT::renderDataTable(
@@ -64,8 +122,9 @@ function(input, output, session) {
 
   # RNA expression plot
   output$RNA_exprs <- renderPlot({
-    filter(RNA_exprs, GeneID == input$gene) %>%
-    filter(Group %in% unlist(input$select_groups)) %>%
+    #filter(RNA_exprs, GeneID == input$gene) %>%
+    filter(data()$RNA_exprs, GeneID == input$gene) %>%
+    #filter(Group %in% unlist(input$select_groups)) %>%
       ggplot(aes(x = Group, y = CPM)) +
         {if (input$RNA_exprs_anno == "1") {
           stat_summary(
@@ -87,8 +146,9 @@ function(input, output, session) {
 
   # ATAC expression plot
   output$ATAC_exprs <- renderPlot({
-    filter(ATAC_exprs, peak_coord == input$enhancer) %>%
-    filter(Group %in% unlist(input$select_groups)) %>%
+    #filter(ATAC_exprs, peak_coord == input$enhancer) %>%
+    filter(data()$ATAC_exprs, peak_coord == input$enhancer) %>%
+    #filter(Group %in% unlist(input$select_groups)) %>%
       ggplot(aes(x = Group, y = CPM)) +
         {if (input$ATAC_exprs_anno == "1") {
           stat_summary(
@@ -110,25 +170,8 @@ function(input, output, session) {
 
   # RNA PCA plot
   output$RNA_pca <- renderPlot({
-    RNA_exprs_wide_filt <- RNA_exprs_wide[,
-      grepl(paste(unlist(input$select_groups), collapse = "|"),
-      colnames(RNA_exprs_wide))]
-
-    RNA_anno <- unique(RNA_exprs[, -c(1, 6)])
-    RNA_anno$Sample <- gsub(".5", "", RNA_anno$Sample)
-
-    vsd <- varianceStabilizingTransformation(round(
-      as.matrix(RNA_exprs_wide_filt)))
-    rv <- rowVars(vsd)
-    select <- order(rv, decreasing = TRUE)[seq_len(min(200, length(rv)))]
-
-    pca_res <- prcomp(t(vsd)) #[select, ]))
-    pca_res$x <- data.frame(pca_res$x[, 1:2]) %>%
-      rownames_to_column("Sample") %>%
-      left_join(RNA_anno)
-    pca_res$rotation <- data.frame(pca_res$rotation[, 1:2]) %>%
-      rownames_to_column("GeneID") %>%
-      filter(GeneID == input$gene)
+    pca_res <- data()$RNA_pca
+    pca_res$rotation <- filter(pca_res$rotation, GeneID == input$gene)
 
     ggplot(pca_res$x, aes(x = PC1, y = PC2)) +
       {if (input$RNA_exprs_anno == "1") {
@@ -157,25 +200,9 @@ function(input, output, session) {
 
   # ATAC PCA plot
   output$ATAC_pca <- renderPlot({
-    ATAC_exprs_wide_filt <- ATAC_exprs_wide[,
-      grepl(paste(unlist(input$select_groups), collapse = "|"),
-      colnames(ATAC_exprs_wide))]
-
-    ATAC_anno <- unique(ATAC_exprs[, c(5:8, 10)])
-
-    vsd <- varianceStabilizingTransformation(round(
-      as.matrix(na.omit(ATAC_exprs_wide_filt))))
-    rv <- rowVars(vsd)
-    select <- order(rv, decreasing = TRUE)[seq_len(min(200, length(rv)))]
-
-    pca_res <- prcomp(t(vsd)) #[select, ]))
-    pca_res$x <- data.frame(pca_res$x[, 1:2]) %>%
-      rownames_to_column("Sample") %>%
-      left_join(ATAC_anno)
-    pca_res$rotation <- data.frame(pca_res$rotation[, 1:2]) %>%
-      rownames_to_column("peak_coord") %>%
-      filter(peak_coord == input$enhancer)
-
+    pca_res <- data()$ATAC_pca
+    pca_res$rotation <- filter(pca_res$rotation, peak_coord == input$enhancer)
+    
     ggplot(pca_res$x, aes(x = PC1, y = PC2)) +
       {if (input$ATAC_exprs_anno == "1") {
         geom_point(aes(col = Population), size = 3)
