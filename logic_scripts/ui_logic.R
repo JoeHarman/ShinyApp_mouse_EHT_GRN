@@ -37,16 +37,17 @@ ui <- fluidPage(
 
           column(6, h3("Expression plot"),
             selectInput("gene", "Choose a gene for expression:",
-            choices = unique(RNA_exprs$GeneID)),
+            choices = unique(deg)),
             plotOutput("RNA_exprs") %>%
               withSpinner(type = 5, color = "#0dc5c1", hide.ui = FALSE))
         ),
 
         # Annotations row
         fluidRow(
-         # placeholder,
+          sliderInput("RNA_topn", "Top variable genes for PCA calculation:",
+            min = 0, max = nrow(RNA_exprs_wide), value = 5000),
           radioButtons(
-            "RNA_exprs_anno", "Colour annotation:",
+            "RNA_exprs_anno", "Colour annotation:", inline = TRUE,
             choices = c(
               "Population" = 1,
               "Stage" = 2,
@@ -79,9 +80,10 @@ ui <- fluidPage(
 
         # Annotations row
         fluidRow(
-        #  placeholder,
+          sliderInput("ATAC_topn", "Number of observations:",
+            min = 0, max = nrow(ATAC_exprs_wide), value = 1000),
           radioButtons(
-            "ATAC_exprs_anno", "Colour annotation:",
+            "ATAC_exprs_anno", "Colour annotation:", inline = TRUE,
             choices = c(
               "Population" = 1,
               "Stage" = 2,

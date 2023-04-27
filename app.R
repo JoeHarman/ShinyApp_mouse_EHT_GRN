@@ -35,14 +35,19 @@ RNA_stats <- readRDS("./data/RNA_stats.rds") %>%
 samples <- unique(RNA_exprs$Group)
 names(samples) <- samples
 
+deg <- RNA_stats$GeneID
+dae <- ATAC_stats$peak_coord
+
 # exprs to wide
 RNA_exprs_wide <- RNA_exprs[, c(1, 2, 6)] %>%
+  filter(GeneID %in% deg) %>%
   reshape2::dcast(GeneID ~ Sample) %>%
   column_to_rownames("GeneID")
 colnames(RNA_exprs_wide) <- gsub(".5", "", colnames(RNA_exprs_wide))
 
 
 ATAC_exprs_wide <- ATAC_exprs[, c(2, 5, 9)] %>%
+  filter(peak_coord %in% dae) %>%
   reshape2::dcast(peak_coord ~ Sample) %>%
   column_to_rownames("peak_coord")
 

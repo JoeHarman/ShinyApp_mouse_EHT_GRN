@@ -6,7 +6,7 @@ function(input, output, session) {
   )
 
   updateSelectizeInput(session, "enhancer",
-    choices = unique(ATAC_exprs$peak_coord), server = TRUE)
+    choices = unique(dae), server = TRUE)
 
   data <- eventReactive(input$subsetSamples, {
 
@@ -29,10 +29,11 @@ function(input, output, session) {
 
     vsd <- varianceStabilizingTransformation(round(
       as.matrix(RNA_exprs_wide_filt)))
-    #rv <- rowVars(vsd)
-    #select <- order(rv, decreasing = TRUE)[seq_len(min(200, length(rv)))]
+    rv <- rowVars(vsd)
+    select <- order(rv, decreasing = TRUE)[
+      seq_len(min(input$RNA_topn, length(rv)))]
 
-    RNA_pca <- prcomp(t(vsd)) #[select, ]))
+    RNA_pca <- prcomp(t(vsd[select, ]))
     RNA_pca$x <- data.frame(RNA_pca$x[, 1:2]) %>%
       rownames_to_column("Sample") %>%
       left_join(RNA_anno)
@@ -49,10 +50,11 @@ function(input, output, session) {
 
     vsd <- varianceStabilizingTransformation(round(
       as.matrix(na.omit(ATAC_exprs_wide_filt))))
-    #rv <- rowVars(vsd)
-    #select <- order(rv, decreasing = TRUE)[seq_len(min(200, length(rv)))]
+    rv <- rowVars(vsd)
+    select <- order(rv, decreasing = TRUE)[
+      seq_len(min(input$ATAC_topn, length(rv)))]
 
-    ATAC_pca <- prcomp(t(vsd)) #[select, ]))
+    ATAC_pca <- prcomp(t(vsd[select, ]))
     ATAC_pca$x <- data.frame(ATAC_pca$x[, 1:2]) %>%
       rownames_to_column("Sample") %>%
       left_join(ATAC_anno)
