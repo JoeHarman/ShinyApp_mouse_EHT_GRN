@@ -9,13 +9,12 @@ library(DESeq2)
 
 # Set up user passwords
 credentials <- data.frame(
-  user = c("jharman"), # mandatory
-  password = c("eht_is_cool"), # mandatory
-  start = c("2023-04-19"),
-  expire = c(NA),
-  admin = c(TRUE),
-  comment = "Simple and secure authentification mechanism 
-      for single ‘Shiny’ applications.",
+  user = c("jharman", "mdb_group"),
+  password = c("eht_is_cool", "shiny_eht"),
+  start = c("2023-04-19", "2023-04-19"),
+  expire = c(NA, NA),
+  admin = c(TRUE, FALSE),
+  comment = "Basic password protection",
   stringsAsFactors = FALSE
 )
 
