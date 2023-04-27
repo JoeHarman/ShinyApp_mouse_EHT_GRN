@@ -1,6 +1,8 @@
 library(shiny)
 library(shinymanager)
+library(shinythemes)
 library(shinycssloaders)
+library(htmlwidgets)
 library(tidyverse)
 library(edgeR)
 library(DESeq2)
@@ -17,10 +19,8 @@ credentials <- data.frame(
   stringsAsFactors = FALSE
 )
 
-# Def functions
-p_formatter <- function(x) {
-  format(x, digits = 2, scientific = TRUE)
-}
+# Source functions
+source("./logic_scripts/functions.R")
 
 # Read in data
 ATAC_exprs <- readRDS("./data/ATAC_exprs.rds")
@@ -56,10 +56,6 @@ RNA_anno$Sample <- gsub(".5", "", RNA_anno$Sample)
 ATAC_anno <- unique(ATAC_exprs[, c(5:8, 10)])
 
 # Colour schemes
-gg_color_hue <- function(n) {
-  hues <- seq(15, 375, length = n + 1)
-  hcl(h = hues, l = 65, c = 100)[1:n]
-}
 
 col_scheme <- list(
   Population = c(EC = "#4444c0", HE = "#53bf53",

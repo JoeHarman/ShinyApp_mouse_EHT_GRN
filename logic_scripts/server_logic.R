@@ -93,6 +93,7 @@ function(input, output, session) {
     selection = "single",
     filter = "top",
     rownames = FALSE
+   # , '#c1d9da', '#fff'
   )
 
   # ATAC data table

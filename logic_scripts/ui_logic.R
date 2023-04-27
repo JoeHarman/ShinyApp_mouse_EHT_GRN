@@ -3,7 +3,7 @@ navbarPage(
   verbatimTextOutput("auth_output")
 )
 
-ui <- fluidPage(
+ui <- fluidPage(theme = shinytheme("flatly"), shinythemes::themeSelector(),
 
   titlePanel("EHT GRN app"),
 
