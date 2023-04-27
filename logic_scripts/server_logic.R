@@ -108,4 +108,97 @@ function(input, output, session) {
         theme_classic()
   })
 
+  # RNA PCA plot
+  output$RNA_pca <- renderPlot({
+    RNA_exprs_wide_filt <- RNA_exprs_wide[,
+      grepl(paste(unlist(input$select_groups), collapse = "|"),
+      colnames(RNA_exprs_wide))]
+
+    RNA_anno <- unique(RNA_exprs[, -c(1, 6)])
+    RNA_anno$Sample <- gsub(".5", "", RNA_anno$Sample)
+
+    vsd <- varianceStabilizingTransformation(round(
+      as.matrix(RNA_exprs_wide_filt)))
+    rv <- rowVars(vsd)
+    select <- order(rv, decreasing = TRUE)[seq_len(min(200, length(rv)))]
+
+    pca_res <- prcomp(t(vsd)) #[select, ]))
+    pca_res$x <- data.frame(pca_res$x[, 1:2]) %>%
+      rownames_to_column("Sample") %>%
+      left_join(RNA_anno)
+    pca_res$rotation <- data.frame(pca_res$rotation[, 1:2]) %>%
+      rownames_to_column("GeneID") %>%
+      filter(GeneID == input$gene)
+
+    ggplot(pca_res$x, aes(x = PC1, y = PC2)) +
+      {if (input$RNA_exprs_anno == "1") {
+        geom_point(aes(col = Population), size = 3)
+      }else if (input$RNA_exprs_anno == "2") {
+        geom_point(aes(col = Stage), size = 3)
+      }else if (input$RNA_exprs_anno == "3") {
+        geom_point(aes(col = Group), size = 3)
+      }} +
+      geom_point(
+        data = pca_res$rotation,
+        mapping = aes(x = PC1 * 1000, y = PC2 * 1000, label = GeneID),
+          col = "red", size = 3) +
+      geom_text(data = pca_res$rotation,
+        mapping = aes(x = PC1 * 1000, y = PC2 * 1000, label = GeneID),
+        col = "red") +
+      geom_segment(data = pca_res$rotation,
+        mapping = aes(x = 0, y = 0, xend = PC1 * 1000 * 0.85,
+        yend = PC2 * 1000 * 0.85), arrow = arrow(length = unit(0.5, "cm"))) +
+      geom_hline(yintercept = 0, linetype = "dashed") +
+      geom_vline(xintercept = 0, linetype = "dashed") +
+      scale_colour_manual(
+        values = col_scheme[[as.numeric(input$RNA_exprs_anno)]]) +
+      theme_classic()
+  })
+
+  # ATAC PCA plot
+  output$ATAC_pca <- renderPlot({
+    ATAC_exprs_wide_filt <- ATAC_exprs_wide[,
+      grepl(paste(unlist(input$select_groups), collapse = "|"),
+      colnames(ATAC_exprs_wide))]
+
+    ATAC_anno <- unique(ATAC_exprs[, c(5:8, 10)])
+
+    vsd <- varianceStabilizingTransformation(round(
+      as.matrix(na.omit(ATAC_exprs_wide_filt))))
+    rv <- rowVars(vsd)
+    select <- order(rv, decreasing = TRUE)[seq_len(min(200, length(rv)))]
+
+    pca_res <- prcomp(t(vsd)) #[select, ]))
+    pca_res$x <- data.frame(pca_res$x[, 1:2]) %>%
+      rownames_to_column("Sample") %>%
+      left_join(ATAC_anno)
+    pca_res$rotation <- data.frame(pca_res$rotation[, 1:2]) %>%
+      rownames_to_column("peak_coord") %>%
+      filter(peak_coord == input$enhancer)
+
+    ggplot(pca_res$x, aes(x = PC1, y = PC2)) +
+      {if (input$ATAC_exprs_anno == "1") {
+        geom_point(aes(col = Population), size = 3)
+      }else if (input$ATAC_exprs_anno == "2") {
+        geom_point(aes(col = Stage), size = 3)
+      }else if (input$ATAC_exprs_anno == "3") {
+        geom_point(aes(col = Group), size = 3)
+      }} +
+      geom_point(
+        data = pca_res$rotation,
+        mapping = aes(x = PC1 * 2000, y = PC2 * 2000, label = peak_coord),
+          col = "red", size = 3) +
+      geom_text(data = pca_res$rotation,
+        mapping = aes(x = PC1 * 2000, y = PC2 * 2000, label = peak_coord),
+        col = "red") +
+      geom_segment(data = pca_res$rotation,
+        mapping = aes(x = 0, y = 0, xend = PC1 * 2000 * 0.85,
+        yend = PC2 * 2000 * 0.85), arrow = arrow(length = unit(0.5, "cm"))) +
+      geom_hline(yintercept = 0, linetype = "dashed") +
+      geom_vline(xintercept = 0, linetype = "dashed") +
+      scale_colour_manual(
+        values = col_scheme[[as.numeric(input$ATAC_exprs_anno)]]) +
+      theme_classic()
+  })
+
 }

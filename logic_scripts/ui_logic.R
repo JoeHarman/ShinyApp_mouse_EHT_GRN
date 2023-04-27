@@ -29,9 +29,11 @@ ui <- fluidPage(
 
         # Plots row
         fluidRow(
-          column(6, h3("PCA plot"), plotOutput("RNA_pca")),
+          column(6, h3("PCA plot"),
+            plotOutput("RNA_pca")),
+
           column(6, h3("Expression plot"),
-            selectInput("gene", "Choose a gene:",
+            selectInput("gene", "Choose a gene for expression:",
             choices = unique(RNA_exprs$GeneID)),
             plotOutput("RNA_exprs"))
         ),
@@ -59,10 +61,12 @@ ui <- fluidPage(
 
         # Plots row
         fluidRow(
-          column(6, h3("PCA plot"), renderPlot("ATAC_pca")),
+          column(6, h3("PCA plot"),
+            plotOutput("ATAC_pca")),
           column(6, h3("Accessibility plot"),
-            selectizeInput("enhancer", "Choose an enhancer:",
-            choices = NULL),
+            selectizeInput("enhancer",
+              "Choose an enhancer for accessibility plot:",
+              choices = NULL),
             plotOutput("ATAC_exprs"))
         ),
 

@@ -2,6 +2,7 @@ library(shiny)
 library(shinymanager)
 library(tidyverse)
 library(edgeR)
+library(DESeq2)
 
 # Set up user passwords
 credentials <- data.frame(
@@ -32,6 +33,17 @@ RNA_stats <- readRDS("./data/RNA_stats.rds") %>%
 
 samples <- unique(RNA_exprs$Group)
 names(samples) <- samples
+
+# exprs to wide
+RNA_exprs_wide <- RNA_exprs[, c(1, 2, 6)] %>%
+  reshape2::dcast(GeneID ~ Sample) %>%
+  column_to_rownames("GeneID")
+colnames(RNA_exprs_wide) <- gsub(".5", "", colnames(RNA_exprs_wide))
+
+
+ATAC_exprs_wide <- ATAC_exprs[, c(2, 5, 9)] %>%
+  reshape2::dcast(peak_coord ~ Sample) %>%
+  column_to_rownames("peak_coord")
 
 # Colour schemes
 gg_color_hue <- function(n) {
