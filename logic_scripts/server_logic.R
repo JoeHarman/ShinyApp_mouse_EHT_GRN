@@ -64,7 +64,7 @@ function(input, output, session) {
     ### Return data
 
     return(processedData)
-  })
+  }, ignoreNULL = FALSE) # Allows processing on app startup
 
   # RNA data table
   output$RNA_stats_tbl <- DT::renderDataTable(
@@ -202,7 +202,7 @@ function(input, output, session) {
   output$ATAC_pca <- renderPlot({
     pca_res <- data()$ATAC_pca
     pca_res$rotation <- filter(pca_res$rotation, peak_coord == input$enhancer)
-    
+
     ggplot(pca_res$x, aes(x = PC1, y = PC2)) +
       {if (input$ATAC_exprs_anno == "1") {
         geom_point(aes(col = Population), size = 3)
