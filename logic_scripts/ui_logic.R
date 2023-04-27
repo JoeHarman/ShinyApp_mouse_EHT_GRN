@@ -25,18 +25,21 @@ ui <- fluidPage(
         # Stats row
         fluidRow(
           column(8, h3("Differential expression analysis:")),
-          DT::dataTableOutput("RNA_stats_tbl", width = "90%")
+          DT::dataTableOutput("RNA_stats_tbl", width = "90%") %>%
+            withSpinner(type = 5, color = "#0dc5c1")
         ),
 
         # Plots row
         fluidRow(
           column(6, h3("PCA plot"),
-            plotOutput("RNA_pca")),
+            plotOutput("RNA_pca") %>%
+              withSpinner(type = 5, color = "#0dc5c1", hide.ui = FALSE)),
 
           column(6, h3("Expression plot"),
             selectInput("gene", "Choose a gene for expression:",
             choices = unique(RNA_exprs$GeneID)),
-            plotOutput("RNA_exprs"))
+            plotOutput("RNA_exprs") %>%
+              withSpinner(type = 5, color = "#0dc5c1", hide.ui = FALSE))
         ),
 
         # Annotations row
@@ -57,18 +60,21 @@ ui <- fluidPage(
         # Stats row
         fluidRow(
           column(8, h3("Differential accessibility analysis:")),
-          DT::dataTableOutput("ATAC_stats_tbl", width = "90%")
+          DT::dataTableOutput("ATAC_stats_tbl", width = "90%") %>%
+            withSpinner(type = 5, color = "#0dc5c1")
         ),
 
         # Plots row
         fluidRow(
           column(6, h3("PCA plot"),
-            plotOutput("ATAC_pca")),
+            plotOutput("ATAC_pca") %>%
+              withSpinner(type = 5, color = "#0dc5c1", hide.ui = FALSE)),
           column(6, h3("Accessibility plot"),
             selectizeInput("enhancer",
               "Choose an enhancer for accessibility plot:",
               choices = NULL),
-            plotOutput("ATAC_exprs"))
+            plotOutput("ATAC_exprs") %>%
+              withSpinner(type = 5, color = "#0dc5c1", hide.ui = FALSE))
         ),
 
         # Annotations row
