@@ -61,7 +61,6 @@ ui <- fluidPage(theme = shinytheme("flatly"), shinythemes::themeSelector(),
           DT::dataTableOutput("RNA_stats_tbl", width = "90%") %>%
             withSpinner(type = 5, color = "#0dc5c1")
         )
-
       ),
 
       ### ATAC panel code ###

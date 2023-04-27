@@ -25,38 +25,20 @@ source("./logic_scripts/functions.R")
 # Read in data
 ATAC_exprs <- readRDS("./data/ATAC_exprs.rds")
 RNA_exprs <- readRDS("./data/RNA_exprs.rds")
-ATAC_stats <- readRDS("./data/ATAC_stats.rds") %>%
-  mutate_at(c(4, 6, 8, 10, 12), function(x) round(x, 2)) %>%
-  mutate_at(c(5, 7, 9, 11, 13), function(x) signif(x, 3))
-RNA_stats <- readRDS("./data/RNA_stats.rds") %>%
-  mutate_at(c(2, 4, 6, 8, 10), function(x) round(x, 2)) %>%
-  mutate_at(c(3, 5, 7, 9, 11), function(x) signif(x, 3))
+ATAC_stats <- readRDS("./data/ATAC_stats.rds")
+RNA_stats <- readRDS("./data/RNA_stats.rds")
+RNA_exprs_wide <- readRDS("./data/RNA_exprs_wide.rds")
+ATAC_exprs_wide <- readRDS("./data/ATAC_exprs_wide.rds")
+RNA_anno <- readRDS("./data/RNA_anno.rds")
+ATAC_anno <- readRDS("./data/ATAC_anno.rds")
 
+# Useful variables
 samples <- unique(RNA_exprs$Group)
 names(samples) <- samples
-
 deg <- RNA_stats$GeneID
 dae <- ATAC_stats$peak_coord
 
-# exprs to wide
-RNA_exprs_wide <- RNA_exprs[, c(1, 2, 6)] %>%
-  filter(GeneID %in% deg) %>%
-  reshape2::dcast(GeneID ~ Sample) %>%
-  column_to_rownames("GeneID")
-colnames(RNA_exprs_wide) <- gsub(".5", "", colnames(RNA_exprs_wide))
-
-
-ATAC_exprs_wide <- ATAC_exprs[, c(2, 5, 9)] %>%
-  filter(peak_coord %in% dae) %>%
-  reshape2::dcast(peak_coord ~ Sample) %>%
-  column_to_rownames("peak_coord")
-
-RNA_anno <- unique(RNA_exprs[, -c(1, 6)])
-RNA_anno$Sample <- gsub(".5", "", RNA_anno$Sample)
-ATAC_anno <- unique(ATAC_exprs[, c(5:8, 10)])
-
 # Colour schemes
-
 col_scheme <- list(
   Population = c(EC = "#4444c0", HE = "#53bf53",
     proHSC = "#daa84c", preI = "#c34747", preII = "#843b3b"),
