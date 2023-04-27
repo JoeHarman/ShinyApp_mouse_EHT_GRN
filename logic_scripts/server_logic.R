@@ -186,7 +186,7 @@ function(input, output, session) {
       }} +
       geom_point(
         data = pca_res$rotation,
-        mapping = aes(x = PC1 * 1000, y = PC2 * 1000, label = GeneID),
+        mapping = aes(x = PC1 * 1000, y = PC2 * 1000),
           col = "red", size = 3) +
       geom_text(data = pca_res$rotation,
         mapping = aes(x = PC1 * 1000, y = PC2 * 1000, label = GeneID),
@@ -216,7 +216,7 @@ function(input, output, session) {
       }} +
       geom_point(
         data = pca_res$rotation,
-        mapping = aes(x = PC1 * 2000, y = PC2 * 2000, label = peak_coord),
+        mapping = aes(x = PC1 * 2000, y = PC2 * 2000),
           col = "red", size = 3) +
       geom_text(data = pca_res$rotation,
         mapping = aes(x = PC1 * 2000, y = PC2 * 2000, label = peak_coord),
