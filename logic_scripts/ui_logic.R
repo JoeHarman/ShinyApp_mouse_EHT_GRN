@@ -86,9 +86,10 @@ ui <- fluidPage(theme = shinytheme("flatly"), shinythemes::themeSelector(),
           ),
           column(4,
             sliderInput("ATAC_topn",
-              "Top variable enhancers for PCA calculation:",
+              "Top variable enhancers for PCA calculation:\n
+              (Max 10,000 due to memory limits)",
               min = 0,
-              max = length(pull(tbl(sql_db, "ATAC_exprs_wide"), peak_coord)),
+              max = 10000, #length(pull(tbl(sql_db, "ATAC_exprs_wide"), peak_coord)),
               value = 5000)
           ),
         )),
