@@ -1,6 +1,7 @@
 function(input, output, session) {
 
   # Check_credentials returns a function to authenticate users
+  # Note - this should be removed in final release
   res_auth <- secure_server(
     check_credentials = check_credentials(credentials)
   )
@@ -9,9 +10,11 @@ function(input, output, session) {
     choices = unique(dae), server = TRUE)
 
   ### Action button event handling
-  # On button click, subset samples and calculate PCA
+  ### On button click, subset samples and calculate PCA
   data <- eventReactive(input$subsetSamples, {
 
+    # Set selected groups to variable. Required step, as 
+    # SQL database queries don't recognise input variables.
     selected_groups <- unlist(input$select_groups)
 
     ### Init list
@@ -76,8 +79,8 @@ function(input, output, session) {
     processedData$ATAC_pca <- ATAC_pca
 
     ### Return data
-
     return(processedData)
+    
   }, ignoreNULL = FALSE) # Allows processing on app startup
 
   # RNA data table
