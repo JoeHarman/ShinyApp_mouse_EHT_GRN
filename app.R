@@ -5,10 +5,11 @@ library(shinymanager)
 library(shinythemes)
 library(shinycssloaders)
 library(htmlwidgets)
+library(readr)
 library(dplyr)
+library(dbplyr)
 library(tibble)
 library(ggplot2)
-#library(edgeR)
 library(DESeq2)
 
 # Set up user passwords
