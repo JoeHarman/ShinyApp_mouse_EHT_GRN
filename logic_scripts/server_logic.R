@@ -7,7 +7,7 @@ function(input, output, session) {
   )
 
   updateSelectizeInput(session, "enhancer",
-    choices = unique(dae), server = TRUE)
+    choices = unique(ATAC_stats$peak_coord), server = TRUE)
 
   ### Action button event handling
   ### On button click, subset samples and calculate PCA
@@ -151,6 +151,7 @@ function(input, output, session) {
     data()$RNA_exprs %>%
       dplyr::filter(GeneID == gene_select) %>%
       collect() %>%
+      mutate(Group = factor(Group, levels = unique(Group))) %>%
       ggplot(aes(x = Group, y = CPM)) +
         {if (input$RNA_exprs_anno == "1") {
           stat_summary(
@@ -177,6 +178,7 @@ function(input, output, session) {
     data()$ATAC_exprs %>%
       dplyr::filter(peak_coord == enhancer_select) %>%
       collect() %>%
+      mutate(Group = factor(Group, levels = unique(Group))) %>%
       ggplot(aes(x = Group, y = CPM)) +
         {if (input$ATAC_exprs_anno == "1") {
           stat_summary(
