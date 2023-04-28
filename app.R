@@ -1,10 +1,14 @@
+library(BiocManager)
+options(repos = BiocManager::repositories())
 library(shiny)
 library(shinymanager)
 library(shinythemes)
 library(shinycssloaders)
 library(htmlwidgets)
-library(tidyverse)
-library(edgeR)
+library(dplyr)
+library(tibble)
+library(ggplot2)
+#library(edgeR)
 library(DESeq2)
 
 # Set up user passwords

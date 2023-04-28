@@ -93,7 +93,6 @@ function(input, output, session) {
     selection = "single",
     filter = "top",
     rownames = FALSE
-   # , '#c1d9da', '#fff'
   )
 
   # ATAC data table
@@ -125,9 +124,7 @@ function(input, output, session) {
 
   # RNA expression plot
   output$RNA_exprs <- renderPlot({
-    #filter(RNA_exprs, GeneID == input$gene) %>%
     filter(data()$RNA_exprs, GeneID == input$gene) %>%
-    #filter(Group %in% unlist(input$select_groups)) %>%
       ggplot(aes(x = Group, y = CPM)) +
         {if (input$RNA_exprs_anno == "1") {
           stat_summary(
@@ -149,9 +146,7 @@ function(input, output, session) {
 
   # ATAC expression plot
   output$ATAC_exprs <- renderPlot({
-    #filter(ATAC_exprs, peak_coord == input$enhancer) %>%
     filter(data()$ATAC_exprs, peak_coord == input$enhancer) %>%
-    #filter(Group %in% unlist(input$select_groups)) %>%
       ggplot(aes(x = Group, y = CPM)) +
         {if (input$ATAC_exprs_anno == "1") {
           stat_summary(
