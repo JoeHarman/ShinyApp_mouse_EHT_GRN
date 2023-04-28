@@ -33,18 +33,21 @@ function(input, output, session) {
       paste(selected_groups, collapse = "|"),
       colnames(tbl(sql_db, "RNA_exprs_wide"))))
 
-    RNA_exprs_wide_filt <- tbl(sql_db, "RNA_exprs_wide") %>%
-      dplyr::select(select_ind) %>%
+    vsd <- tbl(sql_db, "RNA_exprs_wide") %>%
+      dplyr::select(c(1, select_ind)) %>%
       collect() %>%
-      column_to_rownames("GeneID")
+      column_to_rownames("GeneID") %>%
+      as.matrix() %>%
+      round() %>%
+      varianceStabilizingTransformation()
 
-    vsd <- varianceStabilizingTransformation(round(
-      as.matrix(RNA_exprs_wide_filt)))
     rv <- rowVars(vsd)
     select <- order(rv, decreasing = TRUE)[
       seq_len(min(input$RNA_topn, length(rv)))]
+    vsd <- vsd[select, ]
 
-    RNA_pca <- prcomp(t(vsd[select, ]))
+    RNA_pca <- prcomp(t(vsd))
+    rm(vsd)
     RNA_pca$x <- data.frame(RNA_pca$x[, 1:2]) %>%
       rownames_to_column("Sample") %>%
       left_join(RNA_anno)
@@ -58,18 +61,22 @@ function(input, output, session) {
       paste(selected_groups, collapse = "|"),
       colnames(tbl(sql_db, "ATAC_exprs_wide"))))
 
-    ATAC_exprs_wide_filt <- tbl(sql_db, "ATAC_exprs_wide") %>%
+    vsd <- tbl(sql_db, "ATAC_exprs_wide") %>%
       dplyr::select(c(1, select_ind)) %>%
       collect() %>%
-      column_to_rownames("peak_coord")
+      column_to_rownames("peak_coord") %>%
+      na.omit() %>%
+      as.matrix() %>%
+      round() %>%
+      varianceStabilizingTransformation()
 
-    vsd <- varianceStabilizingTransformation(round(
-      as.matrix(na.omit(ATAC_exprs_wide_filt))))
     rv <- rowVars(vsd)
     select <- order(rv, decreasing = TRUE)[
       seq_len(min(input$ATAC_topn, length(rv)))]
+    vsd <- vsd[select, ]
 
-    ATAC_pca <- prcomp(t(vsd[select, ]))
+    ATAC_pca <- prcomp(t(vsd))
+    rm(vsd)
     ATAC_pca$x <- data.frame(ATAC_pca$x[, 1:2]) %>%
       rownames_to_column("Sample") %>%
       left_join(ATAC_anno)
@@ -80,7 +87,7 @@ function(input, output, session) {
 
     ### Return data
     return(processedData)
-    
+
   }, ignoreNULL = FALSE) # Allows processing on app startup
 
   # RNA data table
