@@ -40,7 +40,9 @@ vignettes/*.pdf
 
 # data
 *.rds
+*sqlite
 
 # User specific
 misc_scripts.R
 rsconnect/shinyapps.io/joerharman/shinyapp_eht-grn.dcf
+data/SQL_DB.sqlite

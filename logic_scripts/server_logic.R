@@ -8,24 +8,32 @@ function(input, output, session) {
   updateSelectizeInput(session, "enhancer",
     choices = unique(dae), server = TRUE)
 
+  ### Action button event handling
+  # On button click, subset samples and calculate PCA
   data <- eventReactive(input$subsetSamples, {
+
+    selected_groups <- unlist(input$select_groups)
 
     ### Init list
     processedData <- list()
 
     ### Process RNA expression data
-    processedData$RNA_exprs <- filter(
-      RNA_exprs, Group %in% unlist(input$select_groups))
+    processedData$RNA_exprs <- tbl(sql_db, "RNA_exprs") %>%
+      dplyr::filter(Group %in% selected_groups)
 
     ### Process ATAC expression data
-    processedData$ATAC_exprs <- filter(
-      ATAC_exprs, Group %in% unlist(input$select_groups))
+    processedData$ATAC_exprs <- tbl(sql_db, "ATAC_exprs") %>%
+      dplyr::filter(Group %in% selected_groups)
 
     ### Calculate RNA PCA
+    select_ind <- c(1, grep(
+      paste(selected_groups, collapse = "|"),
+      colnames(tbl(sql_db, "RNA_exprs_wide"))))
 
-    RNA_exprs_wide_filt <- RNA_exprs_wide[,
-      grepl(paste(unlist(input$select_groups), collapse = "|"),
-      colnames(RNA_exprs_wide))]
+    RNA_exprs_wide_filt <- tbl(sql_db, "RNA_exprs_wide") %>%
+      dplyr::select(select_ind) %>%
+      collect() %>%
+      column_to_rownames("GeneID")
 
     vsd <- varianceStabilizingTransformation(round(
       as.matrix(RNA_exprs_wide_filt)))
@@ -43,10 +51,14 @@ function(input, output, session) {
     processedData$RNA_pca <- RNA_pca
 
     ### Calculate ATAC PCA
+    select_ind <- c(1, grep(
+      paste(selected_groups, collapse = "|"),
+      colnames(tbl(sql_db, "ATAC_exprs_wide"))))
 
-    ATAC_exprs_wide_filt <- ATAC_exprs_wide[,
-      grepl(paste(unlist(input$select_groups), collapse = "|"),
-      colnames(ATAC_exprs_wide))]
+    ATAC_exprs_wide_filt <- tbl(sql_db, "ATAC_exprs_wide") %>%
+      dplyr::select(c(1, select_ind)) %>%
+      collect() %>%
+      column_to_rownames("peak_coord")
 
     vsd <- varianceStabilizingTransformation(round(
       as.matrix(na.omit(ATAC_exprs_wide_filt))))
@@ -124,7 +136,11 @@ function(input, output, session) {
 
   # RNA expression plot
   output$RNA_exprs <- renderPlot({
-    filter(data()$RNA_exprs, GeneID == input$gene) %>%
+    gene_select <- input$gene
+
+    data()$RNA_exprs %>%
+      dplyr::filter(GeneID == gene_select) %>%
+      collect() %>%
       ggplot(aes(x = Group, y = CPM)) +
         {if (input$RNA_exprs_anno == "1") {
           stat_summary(
@@ -146,7 +162,11 @@ function(input, output, session) {
 
   # ATAC expression plot
   output$ATAC_exprs <- renderPlot({
-    filter(data()$ATAC_exprs, peak_coord == input$enhancer) %>%
+    enhancer_select <- input$enhancer
+
+    data()$ATAC_exprs %>%
+      dplyr::filter(peak_coord == enhancer_select) %>%
+      collect() %>%
       ggplot(aes(x = Group, y = CPM)) +
         {if (input$ATAC_exprs_anno == "1") {
           stat_summary(
@@ -169,7 +189,7 @@ function(input, output, session) {
   # RNA PCA plot
   output$RNA_pca <- renderPlot({
     pca_res <- data()$RNA_pca
-    pca_res$rotation <- filter(pca_res$rotation, GeneID == input$gene)
+    pca_res$rotation <- dplyr::filter(pca_res$rotation, GeneID == input$gene)
 
     ggplot(pca_res$x, aes(x = PC1, y = PC2)) +
       {if (input$RNA_exprs_anno == "1") {
@@ -199,7 +219,8 @@ function(input, output, session) {
   # ATAC PCA plot
   output$ATAC_pca <- renderPlot({
     pca_res <- data()$ATAC_pca
-    pca_res$rotation <- filter(pca_res$rotation, peak_coord == input$enhancer)
+    pca_res$rotation <- dplyr::filter(
+      pca_res$rotation, peak_coord == input$enhancer)
 
     ggplot(pca_res$x, aes(x = PC1, y = PC2)) +
       {if (input$ATAC_exprs_anno == "1") {

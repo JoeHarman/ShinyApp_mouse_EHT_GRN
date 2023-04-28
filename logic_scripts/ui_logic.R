@@ -40,7 +40,9 @@ ui <- fluidPage(theme = shinytheme("flatly"), shinythemes::themeSelector(),
           column(4,
             sliderInput("RNA_topn",
               "Top variable genes for PCA calculation:",
-              min = 0, max = nrow(RNA_exprs_wide), value = nrow(RNA_exprs_wide))
+              min = 0,
+              max = length(pull(tbl(sql_db, "RNA_exprs_wide"), GeneID)),
+              value = length(pull(tbl(sql_db, "RNA_exprs_wide"), GeneID)))
           ),
         )),
 
@@ -85,7 +87,9 @@ ui <- fluidPage(theme = shinytheme("flatly"), shinythemes::themeSelector(),
           column(4,
             sliderInput("ATAC_topn",
               "Top variable enhancers for PCA calculation:",
-              min = 0, max = nrow(ATAC_exprs_wide), value = 5000)
+              min = 0,
+              max = length(pull(tbl(sql_db, "ATAC_exprs_wide"), peak_coord)),
+              value = 5000)
           ),
         )),
 
