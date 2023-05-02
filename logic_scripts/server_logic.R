@@ -6,6 +6,9 @@ function(input, output, session) {
     check_credentials = check_credentials(credentials)
   )
 
+  updateSelectizeInput(session, "gene",
+    choices = unique(deg), server = TRUE)
+
   updateSelectizeInput(session, "enhancer",
     choices = unique(ATAC_stats$peak_coord), server = TRUE)
 
@@ -93,15 +96,15 @@ function(input, output, session) {
   # RNA data table
   output$RNA_stats_tbl <- DT::renderDataTable(
     RNA_stats,
-    server = FALSE,
     options = list(
       paging = TRUE,    ## paginate the output
       pageLength = 10,  ## number of rows to output for each page
+      lengthMenu = c(10, 50, 100),
       scrollX = TRUE,   ## enable scrolling on X axis
       scrollY = TRUE,   ## enable scrolling on Y axis
       autoWidth = TRUE, ## use smart column width handling
-      server = FALSE,   ## use client-side processing
-      dom = "Bfrtip",
+      server = TRUE,   ## use client-side processing
+      dom = "lfrtiBp", # Alternative: dom = "Bfrtlip"
       buttons = c("csv", "excel"),
       formatter = list(
         `E8-EC_E8-preHE_FDR` = p_formatter,
@@ -124,11 +127,12 @@ function(input, output, session) {
     options = list(
       paging = TRUE,    ## paginate the output
       pageLength = 10,  ## number of rows to output for each page
+      lengthMenu = c(10, 50, 100),
       scrollX = TRUE,   ## enable scrolling on X axis
       scrollY = TRUE,   ## enable scrolling on Y axis
       autoWidth = TRUE, ## use smart column width handling
-      server = FALSE,   ## use client-side processing
-      dom = "Bfrtip",
+      server = TRUE,   ## use client-side processing
+      dom = "lfrtiBp", # Alternative: dom = "Bfrtlip"
       buttons = c("csv", "excel"),
       formatter = list(
         `E8-EC_E8-preHE_FDR` = p_formatter,

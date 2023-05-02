@@ -25,8 +25,8 @@ ui <- fluidPage(theme = shinytheme("flatly"), shinythemes::themeSelector(),
         # Annotations row
         wellPanel(fluidRow(
           column(4,
-            selectInput("gene", "Choose a gene for expression:",
-              choices = unique(deg))
+            selectizeInput("gene", "Choose a gene for expression:",
+              choices = NULL)
           ),
           column(4,
             radioButtons(
