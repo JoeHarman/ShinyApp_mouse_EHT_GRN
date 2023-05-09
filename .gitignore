@@ -46,3 +46,5 @@ vignettes/*.pdf
 misc_scripts.R
 rsconnect/shinyapps.io/joerharman/shinyapp_eht-grn.dcf
 data/SQL_DB.sqlite
+data/edges_condensed_atacFilt.txt
+data/nodes_atacFilt.txt

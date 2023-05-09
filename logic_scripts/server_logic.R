@@ -16,7 +16,7 @@ function(input, output, session) {
   ### On button click, subset samples and calculate PCA
   data <- eventReactive(input$subsetSamples, {
 
-    # Set selected groups to variable. Required step, as 
+    # Set selected groups to variable. Required step, as
     # SQL database queries don't recognise input variables.
     selected_groups <- unlist(input$select_groups)
 
@@ -261,6 +261,112 @@ function(input, output, session) {
       scale_colour_manual(
         values = col_scheme[[as.numeric(input$ATAC_exprs_anno)]]) +
       theme_classic()
+  })
+
+  # NETWORK PLOT
+  # Need a data grabber function and plot function
+  # Grabber handles SQL queries (maybe loads full nodes, subsets edges)...
+  # ...then possibly initialises visNetwork
+  # Plot function handles annotation adjustments, i.e, colour options.
+  # Maybe best for visNetwork to initialise here then... See how it works.
+
+  # Process network button
+  grn_list <- eventReactive(input$makeGRN, {
+
+    # Set selected groups to variable. Required step, as
+    # SQL database queries don't recognise input variables.
+    grn_subset <- unlist(input$grn_subset)
+    grn_centrality <- unlist(input$grn_centrality)
+
+    ### Init list
+    grn_list <- list()
+    node_filt <- "TF"
+
+    # Init SQL tables
+    edges <- tbl(sql_db, "GRN_edges")
+    nodes <- tbl(sql_db, "GRN_nodes")
+    centrality <- tbl(sql_db, "GRN_centrality")
+
+    # Filter for TFs
+    if (node_filt == "TF") {
+      nodes <- filter(nodes, is_TF == 1)
+      edges <- filter(edges,
+        to %in% !!pull(nodes, id) & from %in% !!pull(nodes, id))
+      centrality <- filter(centrality, is_TF == 1)
+    }
+
+    # Attach centrality stats and filter
+    # Note: Need to collect early due to dbplyr bug
+    # (see https://github.com/tidyverse/dbplyr/issues/1206)
+    col_select <- paste(grn_subset, grn_centrality, sep = "_")
+
+    centrality <- centrality %>%
+      filter(ifelse(grn_subset == "Full", TRUE, RNA_module == grn_subset)) %>%
+      select_if(grepl(paste0(grn_subset, "|name|RNA_module"), names(.)))
+
+    top_n_genes <- centrality %>%
+      arrange(desc(.data[[col_select]])) %>%
+      head(input$top_n_centrality) %>%
+      collect() %>%
+      pull(name)
+
+    nodes <- filter(nodes, id %in% top_n_genes) %>%
+      left_join(centrality, by = c("id" = "name"))
+    edges <- filter(edges, to %in% top_n_genes & from %in% top_n_genes)
+
+    # Ensure there are no isolated nodes, and remove duplicate/self edges
+    net <- igraph::graph_from_data_frame(
+      collect(edges), directed = TRUE, vertices = collect(nodes)) %>%
+      remove_isolated() %>%
+      igraph::simplify()
+
+    # Prepare visNetwork tables and export
+    n <- igraph::as_data_frame(net, what = "vertices") %>%
+      mutate(label = name, value = .data[[col_select]])
+    colnames(n)[1] <- "id"
+    e <- igraph::as_data_frame(net, what = "edges")
+    colnames(e)[1:2] <- c("from", "to")
+
+    grn_list$edges <- e
+    grn_list$nodes <- n
+
+    ### Return data
+    return(grn_list)
+
+  }, ignoreNULL = FALSE) # Allows processing on app startup
+
+  output$mynetworkid <- renderVisNetwork({
+
+    # Render visNetwork
+
+    visNetwork(grn_list()$nodes, grn_list()$edges) %>%
+      # Node specification
+      visNodes(
+        font = list(size = 30),
+        borderWidth = 2,
+        borderWidthSelected = 2,
+        color = list(
+          background = "#b8b3e1",
+          border = "#6e64bd",
+          highlight = list(background = "#d65a5a",
+            border = "black")
+        )) %>%
+
+      # Edge specification
+      visEdges(physics = FALSE,
+        arrows = list(to = list(enabled = TRUE, scaleFactor = 1)),
+        color = list(highlight = "#b72929")) %>%
+
+      # Highlight options
+      visOptions(
+        highlightNearest = list(enabled = TRUE, degree = 1),
+        nodesIdSelection = TRUE) %>%
+
+      # Layout options
+      visIgraphLayout(smooth = FALSE, randomSeed = 12345) %>%
+      visInteraction(navigationButtons = TRUE)
+      # Ideally would include legend
+
   })
 
 }

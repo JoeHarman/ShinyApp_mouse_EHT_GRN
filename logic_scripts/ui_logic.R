@@ -3,7 +3,7 @@ navbarPage(
   verbatimTextOutput("auth_output")
 )
 
-ui <- fluidPage(theme = shinytheme("flatly"), shinythemes::themeSelector(),
+ui <- fluidPage(theme = shinytheme("flatly"), # shinythemes::themeSelector(),
 
   titlePanel("EHT GRN app"),
 
@@ -89,7 +89,8 @@ ui <- fluidPage(theme = shinytheme("flatly"), shinythemes::themeSelector(),
               "Top variable enhancers for PCA calculation:\n
               (Max 10,000 due to memory limits)",
               min = 0,
-              max = 10000, #length(pull(tbl(sql_db, "ATAC_exprs_wide"), peak_coord)),
+              max = 10000,
+              #length(pull(tbl(sql_db, "ATAC_exprs_wide"), peak_coord)),
               value = 5000)
           ),
         )),
@@ -110,6 +111,68 @@ ui <- fluidPage(theme = shinytheme("flatly"), shinythemes::themeSelector(),
           column(8, h3("Differential accessibility analysis:")),
           DT::dataTableOutput("ATAC_stats_tbl", width = "90%") %>%
             withSpinner(type = 5, color = "#0dc5c1")
+        )
+      ),
+
+      ### ATAC panel code ###
+      tabPanel("Network",
+
+        # Annotations row
+        wellPanel(fluidRow(
+          column(3,
+            # INPUT COMMAND
+            actionButton(inputId = "makeGRN", label = "Make GRN")
+          ),
+          column(3,
+            radioButtons(
+              "grn_subset",
+              "GRN subset:",
+              c("Full", "RNA1", "RNA2", "RNA3", "RNA4", "RNA5"),
+              selected = "Full",
+              inline = TRUE
+            ),
+            radioButtons(
+              "grn_centrality",
+              "Centrality measure:",
+              c(Degree = "degree", Betweenness = "betweenness",
+                Closeness = "closeness", Eigenvector = "eigenvector",
+                "Hub score" = "hub_score",
+                "Authority score" = "authority_score"),
+              selected = "degree",
+              inline = TRUE
+            )
+            # NOTE - still want a TF toggle for the downstream analysis.
+            # Maybe toggle for top-n or downstream?
+          ),
+          column(3,
+            sliderInput("top_n_centrality",
+              "# top-most central:",
+              min = 1, max = 316, value = 25)
+          ),
+          column(3,
+            # INPUT COMMAND
+            # GENE SELECTION - CAN IT BE OPTIONAL?
+          ),
+          column(3,
+            # INPUT COMMAND
+            # SUBSETTING - TOP20 RNA1-5, UPSTREAM, DOWNSTREAM
+          ),
+          column(3,
+            # INPUT COMMAND
+            # Top-centrality - degree/betweenness... for subset?
+          )
+        )),
+
+        # Plots row
+        fluidRow(
+          column(12, h3("Network"),
+             visNetworkOutput("mynetworkid", height = "70vh") %>%
+            withSpinner(type = 5, color = "#0dc5c1")
+          )
+
+          # column(6, h3("Top-centrality"),
+          #   # INPUT PLOT
+          # )
         )
       )
     ), width = 10)

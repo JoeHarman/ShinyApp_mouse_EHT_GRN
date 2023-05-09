@@ -8,9 +8,12 @@ library(htmlwidgets)
 library(readr)
 library(dplyr)
 library(dbplyr)
+library(purrr)
 library(tibble)
 library(ggplot2)
 library(DESeq2)
+library(visNetwork)
+library(igraph)
 
 # Set up user passwords
 credentials <- data.frame(
@@ -54,6 +57,8 @@ names(col_scheme$Group) <- unique(pull(tbl(sql_db, "RNA_exprs"), Group))
 # Load ui and server scripts
 ui <- source("./logic_scripts/ui_logic.R",  local = TRUE)$value
 server <- source("./logic_scripts/server_logic.R",  local = TRUE)$value
+
+
 
 # Create shiny app
 shinyApp(secure_app(ui), server)
