@@ -364,7 +364,10 @@ function(input, output, session) {
 
       # Layout options
       visIgraphLayout(smooth = FALSE, randomSeed = 12345) %>%
-      visInteraction(navigationButtons = TRUE)
+      visInteraction(navigationButtons = TRUE) %>%
+
+      # Save image option
+      visExport("png", float = "left")
       # Ideally would include legend
 
   })
