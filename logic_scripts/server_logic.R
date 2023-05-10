@@ -12,6 +12,10 @@ function(input, output, session) {
   updateSelectizeInput(session, "enhancer",
     choices = unique(ATAC_stats$peak_coord), server = TRUE)
 
+  updateSelectizeInput(session, "core_node",
+    choices = tbl(sql_db, "GRN_nodes") %>% pull(id), 
+    selected = "Runx1", server = TRUE)
+
   ### Action button event handling
   ### On button click, subset samples and calculate PCA
   data <- eventReactive(input$subsetSamples, {
@@ -277,6 +281,7 @@ function(input, output, session) {
     # SQL database queries don't recognise input variables.
     grn_subset <- unlist(input$grn_subset)
     grn_centrality <- unlist(input$grn_centrality)
+    core_node <- unlist(input$core_node)
 
     ### Init list
     grn_list <- list()
@@ -288,14 +293,14 @@ function(input, output, session) {
     centrality <- tbl(sql_db, "GRN_centrality")
 
     # Filter for TFs
-    if (node_filt == "TF") {
+    if (input$grn_tf) {
       nodes <- filter(nodes, is_TF == 1)
       edges <- filter(edges,
         to %in% !!pull(nodes, id) & from %in% !!pull(nodes, id))
       centrality <- filter(centrality, is_TF == 1)
     }
 
-    # Attach centrality stats and filter
+    # Filter centrality stats
     # Note: Need to collect early due to dbplyr bug
     # (see https://github.com/tidyverse/dbplyr/issues/1206)
     col_select <- paste(grn_subset, grn_centrality, sep = "_")
@@ -304,15 +309,57 @@ function(input, output, session) {
       filter(ifelse(grn_subset == "Full", TRUE, RNA_module == grn_subset)) %>%
       select_if(grepl(paste0(grn_subset, "|name|RNA_module"), names(.)))
 
-    top_n_genes <- centrality %>%
-      arrange(desc(.data[[col_select]])) %>%
-      head(input$top_n_centrality) %>%
-      collect() %>%
-      pull(name)
+    # Process network modes
+    if(input$grn_mode == "Central TFs"){
 
-    nodes <- filter(nodes, id %in% top_n_genes) %>%
-      left_join(centrality, by = c("id" = "name"))
-    edges <- filter(edges, to %in% top_n_genes & from %in% top_n_genes)
+      # Filter for subset (RNA1-5 or full)
+      nodes <- nodes %>%
+        filter(ifelse(grn_subset == "Full", TRUE, RNA_module == grn_subset))
+      edges <- filter(edges,
+        to %in% !!pull(nodes, id) & from %in% !!pull(nodes, id))
+
+      top_n_genes <- centrality %>%
+        arrange(desc(.data[[col_select]])) %>%
+        head(input$top_n_centrality) %>%
+        collect() %>%
+        pull(name)
+
+      nodes <- filter(nodes, id %in% top_n_genes) %>%
+        left_join(centrality, by = c("id" = "name"))
+      edges <- filter(edges, to %in% top_n_genes & from %in% top_n_genes)
+
+    } else if (input$grn_mode == "Upstream") {
+
+      # Filter for subset (RNA1-5 or full)
+      nodes <- nodes %>%
+        filter(ifelse(grn_subset == "Full", 
+          TRUE, 
+          RNA_module == grn_subset | id == core_node))
+      edges <- filter(edges,
+        to %in% !!pull(nodes, id) & from %in% !!pull(nodes, id))
+      
+      # Process upstream network
+      edges <- filter(edges, to == core_node)
+      nodes <- filter(nodes, 
+        id %in% !!pull(edges, from) | id %in% !!pull(edges, to)) %>%
+        left_join(centrality, by = c("id" = "name"))
+
+    } else if (input$grn_mode == "Downstream") {
+      
+      # Filter for subset (RNA1-5 or full)
+      nodes <- nodes %>%
+        filter(ifelse(grn_subset == "Full", 
+          TRUE, 
+          RNA_module == grn_subset | id == core_node))
+      edges <- filter(edges,
+        to %in% !!pull(nodes, id) & from %in% !!pull(nodes, id))
+
+      # Process downstream network
+      edges <- filter(edges, from == core_node)
+      nodes <- filter(nodes,
+        id %in% !!pull(edges, from) | id %in% !!pull(edges, to)) %>%
+        left_join(centrality, by = c("id" = "name"))
+    }
 
     # Ensure there are no isolated nodes, and remove duplicate/self edges
     net <- igraph::graph_from_data_frame(

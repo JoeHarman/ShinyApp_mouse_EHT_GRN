@@ -121,7 +121,12 @@ ui <- fluidPage(theme = shinytheme("flatly"), # shinythemes::themeSelector(),
         wellPanel(fluidRow(
           column(3,
             # INPUT COMMAND
-            actionButton(inputId = "makeGRN", label = "Make GRN")
+            actionButton(inputId = "makeGRN", label = "Make GRN"),
+            br(),
+            radioGroupButtons(inputId = "grn_mode", label = "Plot mode:",
+              choices = c("Central TFs", "Upstream", "Downstream")),
+            shinyWidgets::prettySwitch("grn_tf", label = "Show TFs only",
+              value = TRUE, fill = TRUE)
           ),
           column(3,
             radioButtons(
@@ -150,6 +155,8 @@ ui <- fluidPage(theme = shinytheme("flatly"), # shinythemes::themeSelector(),
               min = 1, max = 316, value = 25)
           ),
           column(3,
+            selectizeInput("core_node", "Reference node:",
+              choices = NULL)
             # INPUT COMMAND
             # GENE SELECTION - CAN IT BE OPTIONAL?
           ),
