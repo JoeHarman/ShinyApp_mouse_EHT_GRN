@@ -18,7 +18,7 @@ function(input, output, session) {
 
   ### Action button event handling
   ### On button click, subset samples and calculate PCA
-  data <- eventReactive(input$subsetSamples, {
+  expression_data <- reactive({
 
     # Set selected groups to variable. Required step, as
     # SQL database queries don't recognise input variables.
@@ -34,6 +34,22 @@ function(input, output, session) {
     ### Process ATAC expression data
     processedData$ATAC_exprs <- tbl(sql_db, "ATAC_exprs") %>%
       dplyr::filter(Group %in% selected_groups)
+
+    ### Return data
+    return(processedData)
+
+  })
+
+  runPCA_RNA <- eventReactive(input$runPCA_RNA, {
+
+    # Set selected groups to variable. Required step, as
+    # SQL database queries don't recognise input variables.
+    selected_groups <- unlist(input$select_groups)
+
+    if(identical(selected_groups, samples[c(1, 2, 4, 5, 8, 9)])){
+      print("pre-render RNA")
+      return(pca_tables$RNA)
+    }
 
     ### Calculate RNA PCA
     select_ind <- c(1, grep(
@@ -61,7 +77,20 @@ function(input, output, session) {
     RNA_pca$rotation <- data.frame(RNA_pca$rotation[, 1:2]) %>%
       rownames_to_column("GeneID")
 
-    processedData$RNA_pca <- RNA_pca
+    return(RNA_pca)
+
+  }, ignoreNULL = FALSE) # Allows processing on app startup
+
+  runPCA_ATAC <- eventReactive(input$runPCA_ATAC, {
+
+    # Set selected groups to variable. Required step, as
+    # SQL database queries don't recognise input variables.
+    selected_groups <- unlist(input$select_groups)
+
+    if(identical(selected_groups, samples[c(1, 2, 4, 5, 8, 9)])){
+      print("pre-render ATAC")
+      return(pca_tables$ATAC)
+    }
 
     ### Calculate ATAC PCA
     select_ind <- c(1, grep(
@@ -90,12 +119,10 @@ function(input, output, session) {
     ATAC_pca$rotation <- data.frame(ATAC_pca$rotation[, 1:2]) %>%
       rownames_to_column("peak_coord")
 
-    processedData$ATAC_pca <- ATAC_pca
-
-    ### Return data
-    return(processedData)
+    return(ATAC_pca)
 
   }, ignoreNULL = FALSE) # Allows processing on app startup
+
 
   # RNA data table
   output$RNA_stats_tbl <- DT::renderDataTable(
@@ -156,7 +183,7 @@ function(input, output, session) {
   output$RNA_exprs <- renderPlot({
     gene_select <- input$gene
 
-    data()$RNA_exprs %>%
+    expression_data()$RNA_exprs %>%
       dplyr::filter(GeneID == gene_select) %>%
       collect() %>%
       mutate(Group = factor(Group, levels = unique(Group))) %>%
@@ -184,7 +211,7 @@ function(input, output, session) {
   output$ATAC_exprs <- renderPlot({
     enhancer_select <- input$enhancer
 
-    data()$ATAC_exprs %>%
+    expression_data()$ATAC_exprs %>%
       dplyr::filter(peak_coord == enhancer_select) %>%
       collect() %>%
       mutate(Group = factor(Group, levels = unique(Group))) %>%
@@ -210,7 +237,7 @@ function(input, output, session) {
 
   # RNA PCA plot
   output$RNA_pca <- renderPlot({
-    pca_res <- data()$RNA_pca
+    pca_res <- runPCA_RNA()
     pca_res$rotation <- dplyr::filter(pca_res$rotation, GeneID == input$gene)
 
     ggplot(pca_res$x, aes(x = PC1, y = PC2)) +
@@ -241,7 +268,7 @@ function(input, output, session) {
 
   # ATAC PCA plot
   output$ATAC_pca <- renderPlot({
-    pca_res <- data()$ATAC_pca
+    pca_res <- runPCA_ATAC()
     pca_res$rotation <- dplyr::filter(
       pca_res$rotation, peak_coord == input$enhancer)
 
