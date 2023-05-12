@@ -157,9 +157,10 @@ ui <- fluidPage(theme = shinytheme("flatly"), # shinythemes::themeSelector(),
           ),
           column(3,
             selectizeInput("core_node", "Reference node:",
-              choices = NULL)
-            # INPUT COMMAND
-            # GENE SELECTION - CAN IT BE OPTIONAL?
+              choices = NULL),
+            radioGroupButtons(inputId = "corr_filt",
+              label = "Side plot options:",
+              choices = c("Top-20 correlated", "Top-20 anti-correlated"))
           ),
           column(3,
             # INPUT COMMAND
@@ -173,14 +174,15 @@ ui <- fluidPage(theme = shinytheme("flatly"), # shinythemes::themeSelector(),
 
         # Plots row
         fluidRow(
-          column(12, h3("Network"),
-             visNetworkOutput("mynetworkid", height = "70vh") %>%
-            withSpinner(type = 5, color = "#0dc5c1")
-          )
+          column(9, h3("Network"),
+            visNetworkOutput("mynetworkid", height = "70vh") %>%
+              withSpinner(type = 5, color = "#0dc5c1")
+          ),
 
-          # column(6, h3("Top-centrality"),
-          #   # INPUT PLOT
-          # )
+          column(3, h3("Top nodes"),
+            plotOutput("networkSidePlot", height = "70vh") %>%
+              withSpinner(type = 5, color = "#0dc5c1")
+          )
         )
       )
     ), width = 10)

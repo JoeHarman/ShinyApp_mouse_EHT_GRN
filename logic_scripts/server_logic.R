@@ -176,7 +176,8 @@ function(input, output, session) {
         ggtitle(input$gene) +
         scale_fill_manual(
           values = col_scheme[[as.numeric(input$RNA_exprs_anno)]]) +
-        theme_classic()
+        theme_classic() +
+      theme(text = element_text(size = 21))
   })
 
   # ATAC expression plot
@@ -203,7 +204,8 @@ function(input, output, session) {
         ggtitle(input$enhancer) +
         scale_fill_manual(
           values = col_scheme[[as.numeric(input$ATAC_exprs_anno)]]) +
-        theme_classic()
+        theme_classic() +
+      theme(text = element_text(size = 21))
   })
 
   # RNA PCA plot
@@ -233,7 +235,8 @@ function(input, output, session) {
       geom_vline(xintercept = 0, linetype = "dashed") +
       scale_colour_manual(
         values = col_scheme[[as.numeric(input$RNA_exprs_anno)]]) +
-      theme_classic()
+      theme_classic() +
+      theme(text = element_text(size = 21))
   })
 
   # ATAC PCA plot
@@ -264,7 +267,8 @@ function(input, output, session) {
       geom_vline(xintercept = 0, linetype = "dashed") +
       scale_colour_manual(
         values = col_scheme[[as.numeric(input$ATAC_exprs_anno)]]) +
-      theme_classic()
+      theme_classic() +
+      theme(text = element_text(size = 21))
   })
 
   # NETWORK PLOT
@@ -310,7 +314,7 @@ function(input, output, session) {
       select_if(grepl(paste0(grn_subset, "|name|RNA_module"), names(.)))
 
     # Process network modes
-    if(input$grn_mode == "Central TFs"){
+    if(input$grn_mode == "Central TFs") {
 
       # Filter for subset (RNA1-5 or full)
       nodes <- nodes %>%
@@ -325,7 +329,7 @@ function(input, output, session) {
         pull(name)
 
       nodes <- filter(nodes, id %in% top_n_genes) %>%
-        left_join(centrality, by = c("id" = "name"))
+        left_join(centrality, by = c("id" = "name", "RNA_module"))
       edges <- filter(edges, to %in% top_n_genes & from %in% top_n_genes)
 
     } else if (input$grn_mode == "Upstream") {
@@ -342,7 +346,7 @@ function(input, output, session) {
       edges <- filter(edges, to == core_node)
       nodes <- filter(nodes,
         id %in% !!pull(edges, from) | id %in% !!pull(edges, to)) %>%
-        left_join(centrality, by = c("id" = "name"))
+        left_join(centrality, by = c("id" = "name", "RNA_module"))
 
     } else if (input$grn_mode == "Downstream") {
 
@@ -358,7 +362,7 @@ function(input, output, session) {
       edges <- filter(edges, from == core_node)
       nodes <- filter(nodes,
         id %in% !!pull(edges, from) | id %in% !!pull(edges, to)) %>%
-        left_join(centrality, by = c("id" = "name"))
+        left_join(centrality, by = c("id" = "name", "RNA_module"))
     }
 
     # Ensure there are no isolated nodes, and remove duplicate/self edges
@@ -377,6 +381,7 @@ function(input, output, session) {
     grn_list$edges <- e %>%
       left_join(collect(edges))
     grn_list$nodes <- n
+    grn_list$col_select <- col_select
 
 
     ### Return data
@@ -427,5 +432,69 @@ function(input, output, session) {
       write.csv(grn_list()$edges, fname)
     }
   )
+
+  output$networkSidePlot <- renderPlot({
+
+    n <- grn_list()$nodes
+    e <- grn_list()$edges
+    col_select <- grn_list()$col_select
+
+    if(input$grn_mode == "Central TFs") {
+      net_topn <- n %>%
+        select(id:RNA_module, Centrality = col_select) %>%
+        top_n(20, Centrality) %>%
+        arrange((Centrality)) %>%
+        mutate(id = factor(id, levels = (id)))
+
+      net_topn_plot <- ggplot(net_topn,
+        aes(x = Centrality, y = id, fill = RNA_module)) +
+        xlab(gsub("_", " ", col_select))
+
+    } else if(input$grn_mode == "Upstream") {
+      net_topn <- e %>%
+        select(id = from, RNA_correlation) %>%
+        left_join(n) %>%
+        top_n(if (input$corr_filt == "Top-20 correlated") {
+            20
+          } else {
+            -20
+          }, RNA_correlation) %>%
+        arrange(RNA_correlation) %>%
+        mutate(id = factor(id, levels = (id)))
+
+        net_topn_plot <- ggplot(net_topn,
+          aes(x = RNA_correlation, y = id, fill = RNA_module)) +
+          xlab("RNA correlation")
+
+    } else {
+      net_topn <- e %>%
+        select(id = to, RNA_correlation) %>%
+        left_join(n) %>%
+        top_n(if (input$corr_filt == "Top-20 correlated") {
+            20
+          } else {
+            -20
+          }, RNA_correlation) %>%
+        arrange(RNA_correlation) %>%
+        mutate(id = factor(id, levels = (id)))
+
+        net_topn_plot <- ggplot(net_topn,
+          aes(x = RNA_correlation, y = id, fill = RNA_module)) +
+          xlab("RNA correlation")
+
+    }
+
+    net_topn_plot <- net_topn_plot +
+      geom_point(pch = 21, size = 3) +
+      scale_fill_manual(values = c(RNA1 = "yellow", RNA2 = "blue",
+        RNA3 = "green", RNA4 = "orange", RNA5 = "red")) +
+      ylab("") +
+      theme_bw() +
+      theme(text = element_text(size = 21))
+
+    return(net_topn_plot)
+
+  })
+
 
 }
