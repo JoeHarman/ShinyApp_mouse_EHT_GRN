@@ -128,7 +128,7 @@ ui <- fluidPage(theme = shinytheme("flatly"), # shinythemes::themeSelector(),
           column(3,
             # INPUT COMMAND
             actionButton(inputId = "makeGRN", label = "Make GRN"),
-            downloadButton('downGRN',"Export"),
+            downloadButton("downGRN", "Export"),
             br(),
             radioGroupButtons(inputId = "grn_mode", label = "Plot mode:",
               choices = c("Central TFs", "Upstream", "Downstream")),
