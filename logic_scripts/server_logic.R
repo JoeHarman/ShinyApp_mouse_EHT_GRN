@@ -13,7 +13,7 @@ function(input, output, session) {
     choices = unique(ATAC_stats$peak_coord), server = TRUE)
 
   updateSelectizeInput(session, "core_node",
-    choices = tbl(sql_db, "GRN_nodes") %>% pull(id), 
+    choices = tbl(sql_db, "GRN_nodes") %>% pull(id),
     selected = "Runx1", server = TRUE)
 
   ### Action button event handling
@@ -332,24 +332,24 @@ function(input, output, session) {
 
       # Filter for subset (RNA1-5 or full)
       nodes <- nodes %>%
-        filter(ifelse(grn_subset == "Full", 
-          TRUE, 
+        filter(ifelse(grn_subset == "Full",
+          TRUE,
           RNA_module == grn_subset | id == core_node))
       edges <- filter(edges,
         to %in% !!pull(nodes, id) & from %in% !!pull(nodes, id))
-      
+
       # Process upstream network
       edges <- filter(edges, to == core_node)
-      nodes <- filter(nodes, 
+      nodes <- filter(nodes,
         id %in% !!pull(edges, from) | id %in% !!pull(edges, to)) %>%
         left_join(centrality, by = c("id" = "name"))
 
     } else if (input$grn_mode == "Downstream") {
-      
+
       # Filter for subset (RNA1-5 or full)
       nodes <- nodes %>%
-        filter(ifelse(grn_subset == "Full", 
-          TRUE, 
+        filter(ifelse(grn_subset == "Full",
+          TRUE,
           RNA_module == grn_subset | id == core_node))
       edges <- filter(edges,
         to %in% !!pull(nodes, id) & from %in% !!pull(nodes, id))
@@ -374,8 +374,10 @@ function(input, output, session) {
     e <- igraph::as_data_frame(net, what = "edges")
     colnames(e)[1:2] <- c("from", "to")
 
-    grn_list$edges <- e
+    grn_list$edges <- e %>%
+      left_join(collect(edges))
     grn_list$nodes <- n
+
 
     ### Return data
     return(grn_list)
@@ -418,5 +420,12 @@ function(input, output, session) {
       # Ideally would include legend
 
   })
+
+  output$downGRN <- downloadHandler(
+    filename = function() {"grn_interactions.csv"},
+    content = function(fname) {
+      write.csv(grn_list()$edges, fname)
+    }
+  )
 
 }
