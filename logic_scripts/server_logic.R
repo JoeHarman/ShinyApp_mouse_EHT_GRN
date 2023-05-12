@@ -427,7 +427,9 @@ function(input, output, session) {
   })
 
   output$downGRN <- downloadHandler(
-    filename = function() {"grn_interactions.csv"},
+    filename = function() {
+      "grn_interactions.csv"
+    },
     content = function(fname) {
       write.csv(grn_list()$edges, fname)
     }
@@ -439,7 +441,7 @@ function(input, output, session) {
     e <- grn_list()$edges
     col_select <- grn_list()$col_select
 
-    if(input$grn_mode == "Central TFs") {
+    if (input$grn_mode == "Central TFs") {
       net_topn <- n %>%
         select(id:RNA_module, Centrality = col_select) %>%
         top_n(20, Centrality) %>%
@@ -450,7 +452,7 @@ function(input, output, session) {
         aes(x = Centrality, y = id, fill = RNA_module)) +
         xlab(gsub("_", " ", col_select))
 
-    } else if(input$grn_mode == "Upstream") {
+    } else if (input$grn_mode == "Upstream") {
       net_topn <- e %>%
         select(id = from, RNA_correlation) %>%
         left_join(n) %>%
