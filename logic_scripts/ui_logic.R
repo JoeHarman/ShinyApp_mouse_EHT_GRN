@@ -13,7 +13,7 @@ ui <- fluidPage(theme = shinytheme("flatly"), # shinythemes::themeSelector(),
     sidebarPanel(
       checkboxGroupInput("select_groups", "Samples to plot:", samples,
         selected = samples[c(1, 2, 4, 5, 8, 9)]),
-      actionButton(inputId = "subsetSamples", label = "Subset samples"),
+      #actionButton(inputId = "subsetSamples", label = "Subset samples"),
     width = 2),
 
     ##### MAIN PANEL CODE #####
@@ -28,7 +28,7 @@ ui <- fluidPage(theme = shinytheme("flatly"), # shinythemes::themeSelector(),
             selectizeInput("gene", "Choose a gene for expression:",
               choices = NULL)
           ),
-          column(4,
+          column(2,
             radioButtons(
               "RNA_exprs_anno", "Colour annotation:", inline = TRUE,
               choices = c(
@@ -44,6 +44,9 @@ ui <- fluidPage(theme = shinytheme("flatly"), # shinythemes::themeSelector(),
               max = length(pull(tbl(sql_db, "RNA_exprs_wide"), GeneID)),
               value = length(pull(tbl(sql_db, "RNA_exprs_wide"), GeneID)))
           ),
+          column(2,
+            actionButton(inputId = "runPCA_RNA", label = "Run PCA (slow!)")
+          )
         )),
 
         # Plots row
@@ -75,7 +78,7 @@ ui <- fluidPage(theme = shinytheme("flatly"), # shinythemes::themeSelector(),
               "Choose an enhancer for accessibility plot:",
               choices = NULL)
           ),
-          column(4,
+          column(2,
             radioButtons(
               "ATAC_exprs_anno", "Colour annotation:", inline = TRUE,
               choices = c(
@@ -92,6 +95,9 @@ ui <- fluidPage(theme = shinytheme("flatly"), # shinythemes::themeSelector(),
               max = 10000,
               #length(pull(tbl(sql_db, "ATAC_exprs_wide"), peak_coord)),
               value = 5000)
+          ),
+          column(2,
+            actionButton(inputId = "runPCA_ATAC", label = "Run PCA (slow!)")
           ),
         )),
 
@@ -122,7 +128,7 @@ ui <- fluidPage(theme = shinytheme("flatly"), # shinythemes::themeSelector(),
           column(3,
             # INPUT COMMAND
             actionButton(inputId = "makeGRN", label = "Make GRN"),
-            downloadButton('downGRN',"Export"),
+            downloadButton("downGRN", "Export"),
             br(),
             radioGroupButtons(inputId = "grn_mode", label = "Plot mode:",
               choices = c("Central TFs", "Upstream", "Downstream")),

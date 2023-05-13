@@ -18,22 +18,37 @@ function(input, output, session) {
 
   ### Action button event handling
   ### On button click, subset samples and calculate PCA
-  data <- eventReactive(input$subsetSamples, {
+  expression_data <- reactive({
 
     # Set selected groups to variable. Required step, as
     # SQL database queries don't recognise input variables.
     selected_groups <- unlist(input$select_groups)
 
     ### Init list
-    processedData <- list()
+    exprs_list <- list()
 
     ### Process RNA expression data
-    processedData$RNA_exprs <- tbl(sql_db, "RNA_exprs") %>%
+    exprs_list$RNA_exprs <- tbl(sql_db, "RNA_exprs") %>%
       dplyr::filter(Group %in% selected_groups)
 
     ### Process ATAC expression data
-    processedData$ATAC_exprs <- tbl(sql_db, "ATAC_exprs") %>%
+    exprs_list$ATAC_exprs <- tbl(sql_db, "ATAC_exprs") %>%
       dplyr::filter(Group %in% selected_groups)
+
+    ### Return data
+    return(exprs_list)
+
+  })
+
+  run_pca_rna <- eventReactive(input$runPCA_RNA, {
+
+    # Set selected groups to variable. Required step, as
+    # SQL database queries don't recognise input variables.
+    selected_groups <- unlist(input$select_groups)
+
+    if (identical(selected_groups, samples[c(1, 2, 4, 5, 8, 9)])) {
+      return(pca_tables$RNA)
+    }
 
     ### Calculate RNA PCA
     select_ind <- c(1, grep(
@@ -53,15 +68,27 @@ function(input, output, session) {
       seq_len(min(input$RNA_topn, length(rv)))]
     vsd <- vsd[select, ]
 
-    RNA_pca <- prcomp(t(vsd))
+    rna_pca <- prcomp(t(vsd))
     rm(vsd)
-    RNA_pca$x <- data.frame(RNA_pca$x[, 1:2]) %>%
+    rna_pca$x <- data.frame(rna_pca$x[, 1:2]) %>%
       rownames_to_column("Sample") %>%
       left_join(RNA_anno)
-    RNA_pca$rotation <- data.frame(RNA_pca$rotation[, 1:2]) %>%
+    rna_pca$rotation <- data.frame(rna_pca$rotation[, 1:2]) %>%
       rownames_to_column("GeneID")
 
-    processedData$RNA_pca <- RNA_pca
+    return(rna_pca)
+
+  }, ignoreNULL = FALSE) # Allows processing on app startup
+
+  run_pca_atac <- eventReactive(input$runPCA_ATAC, {
+
+    # Set selected groups to variable. Required step, as
+    # SQL database queries don't recognise input variables.
+    selected_groups <- unlist(input$select_groups)
+
+    if (identical(selected_groups, samples[c(1, 2, 4, 5, 8, 9)])) {
+      return(pca_tables$ATAC)
+    }
 
     ### Calculate ATAC PCA
     select_ind <- c(1, grep(
@@ -82,20 +109,18 @@ function(input, output, session) {
       seq_len(min(input$ATAC_topn, length(rv)))]
     vsd <- vsd[select, ]
 
-    ATAC_pca <- prcomp(t(vsd))
+    atac_pca <- prcomp(t(vsd))
     rm(vsd)
-    ATAC_pca$x <- data.frame(ATAC_pca$x[, 1:2]) %>%
+    atac_pca$x <- data.frame(atac_pca$x[, 1:2]) %>%
       rownames_to_column("Sample") %>%
       left_join(ATAC_anno)
-    ATAC_pca$rotation <- data.frame(ATAC_pca$rotation[, 1:2]) %>%
+    atac_pca$rotation <- data.frame(atac_pca$rotation[, 1:2]) %>%
       rownames_to_column("peak_coord")
 
-    processedData$ATAC_pca <- ATAC_pca
-
-    ### Return data
-    return(processedData)
+    return(atac_pca)
 
   }, ignoreNULL = FALSE) # Allows processing on app startup
+
 
   # RNA data table
   output$RNA_stats_tbl <- DT::renderDataTable(
@@ -156,7 +181,7 @@ function(input, output, session) {
   output$RNA_exprs <- renderPlot({
     gene_select <- input$gene
 
-    data()$RNA_exprs %>%
+    expression_data()$RNA_exprs %>%
       dplyr::filter(GeneID == gene_select) %>%
       collect() %>%
       mutate(Group = factor(Group, levels = unique(Group))) %>%
@@ -184,7 +209,7 @@ function(input, output, session) {
   output$ATAC_exprs <- renderPlot({
     enhancer_select <- input$enhancer
 
-    data()$ATAC_exprs %>%
+    expression_data()$ATAC_exprs %>%
       dplyr::filter(peak_coord == enhancer_select) %>%
       collect() %>%
       mutate(Group = factor(Group, levels = unique(Group))) %>%
@@ -210,7 +235,7 @@ function(input, output, session) {
 
   # RNA PCA plot
   output$RNA_pca <- renderPlot({
-    pca_res <- data()$RNA_pca
+    pca_res <- run_pca_rna()
     pca_res$rotation <- dplyr::filter(pca_res$rotation, GeneID == input$gene)
 
     ggplot(pca_res$x, aes(x = PC1, y = PC2)) +
@@ -241,7 +266,7 @@ function(input, output, session) {
 
   # ATAC PCA plot
   output$ATAC_pca <- renderPlot({
-    pca_res <- data()$ATAC_pca
+    pca_res <- run_pca_atac()
     pca_res$rotation <- dplyr::filter(
       pca_res$rotation, peak_coord == input$enhancer)
 
@@ -314,7 +339,7 @@ function(input, output, session) {
       select_if(grepl(paste0(grn_subset, "|name|RNA_module"), names(.)))
 
     # Process network modes
-    if(input$grn_mode == "Central TFs") {
+    if (input$grn_mode == "Central TFs") {
 
       # Filter for subset (RNA1-5 or full)
       nodes <- nodes %>%

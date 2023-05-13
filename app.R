@@ -36,6 +36,8 @@ RNA_stats <- readRDS("./data/RNA_stats.rds")
 RNA_anno <- readRDS("./data/RNA_anno.rds")
 ATAC_anno <- readRDS("./data/ATAC_anno.rds")
 
+pca_tables <- readRDS("./data/PCA_tables.rds")
+
 sql_db <- DBI::dbConnect(RSQLite::SQLite(), dbname = "./data/SQL_DB.sqlite")
 
 # Useful variables
