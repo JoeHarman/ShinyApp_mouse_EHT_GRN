@@ -58,6 +58,9 @@ col_scheme <- list(
 )
 names(col_scheme$Group) <- unique(pull(tbl(sql_db, "RNA_exprs"), Group))
 
+# Parameters
+font_size <- 18
+
 # Text
 help1 <- read_file("./Text/help-1.txt")
 help2 <- read_file("./Text/help-1.txt")

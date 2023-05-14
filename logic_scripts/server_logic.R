@@ -216,8 +216,8 @@ function(input, output, session) {
         scale_fill_manual(
           values = col_scheme[[as.numeric(input$RNA_exprs_anno)]]) +
         theme_classic() +
-        theme(text = element_text(size = 21),
-          axis.text.x = element_text(angle = 45, vjust = 1, hjust=1))
+        theme(text = element_text(size = font_size),
+          axis.text.x = element_text(angle = 45, vjust = 1, hjust = 1))
   })
 
   # ATAC expression plot
@@ -246,8 +246,8 @@ function(input, output, session) {
         scale_fill_manual(
           values = col_scheme[[as.numeric(input$ATAC_exprs_anno)]]) +
         theme_classic() +
-        theme(text = element_text(size = 21),
-          axis.text.x = element_text(angle = 45, vjust = 1, hjust=1))
+        theme(text = element_text(size = font_size),
+          axis.text.x = element_text(angle = 45, vjust = 1, hjust = 1))
   })
 
   # RNA PCA plot
@@ -278,7 +278,7 @@ function(input, output, session) {
       scale_colour_manual(
         values = col_scheme[[as.numeric(input$RNA_exprs_anno)]]) +
       theme_classic() +
-      theme(text = element_text(size = 21))
+      theme(text = element_text(size = font_size))
   })
 
   # ATAC PCA plot
@@ -310,7 +310,7 @@ function(input, output, session) {
       scale_colour_manual(
         values = col_scheme[[as.numeric(input$ATAC_exprs_anno)]]) +
       theme_classic() +
-      theme(text = element_text(size = 21))
+      theme(text = element_text(size = font_size))
   })
 
   # NETWORK PLOT
@@ -534,7 +534,9 @@ function(input, output, session) {
         RNA3 = "green", RNA4 = "orange", RNA5 = "red")) +
       ylab("") +
       theme_bw() +
-      theme(text = element_text(size = 21))
+      theme(text = element_text(size = font_size), legend.position = "bottom",
+        legend.direction = "vertical", legend.text = element_text(size = 15)) +
+      guides(fill = guide_legend(ncol = 2))
 
     return(net_topn_plot)
 
