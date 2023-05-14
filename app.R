@@ -5,6 +5,7 @@ library(shinymanager)
 library(shinyWidgets)
 library(shinythemes)
 library(shinycssloaders)
+library(shinyalert)
 library(htmlwidgets)
 library(readr)
 library(dplyr)
@@ -56,6 +57,12 @@ col_scheme <- list(
   Group = gg_color_hue(length(unique(pull(tbl(sql_db, "RNA_exprs"), Group))))
 )
 names(col_scheme$Group) <- unique(pull(tbl(sql_db, "RNA_exprs"), Group))
+
+# Text
+help1 <- read_file("./Text/help-1.txt")
+help2 <- read_file("./Text/help-1.txt")
+help3 <- read_file("./Text/help-1.txt")
+help4 <- read_file("./Text/help-1.txt")
 
 # Load ui and server scripts
 ui <- source("./logic_scripts/ui_logic.R",  local = TRUE)$value

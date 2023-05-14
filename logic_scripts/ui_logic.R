@@ -13,7 +13,16 @@ ui <- fluidPage(theme = shinytheme("flatly"), # shinythemes::themeSelector(),
     sidebarPanel(
       checkboxGroupInput("select_groups", "Samples to plot:", samples,
         selected = samples[c(1, 2, 4, 5, 8, 9)]),
-      #actionButton(inputId = "subsetSamples", label = "Subset samples"),
+      br(),
+      "Click for instructions:", br(),
+      actionBttn("rna_help", "RNA tab", style = "stretch",
+        color = "warning", size = "sm"), br(),
+      actionBttn("atac_help", "ATAC tab", style = "stretch",
+        color = "warning", size = "sm"), br(),
+      actionBttn("net_help", "Network tab", style = "stretch",
+        color = "warning", size = "sm"), br(),
+      actionBttn("coop_help", "Cooperation tab", style = "stretch",
+        color = "warning", size = "sm"),
     width = 2),
 
     ##### MAIN PANEL CODE #####

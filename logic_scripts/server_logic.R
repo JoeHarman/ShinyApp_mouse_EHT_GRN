@@ -16,6 +16,19 @@ function(input, output, session) {
     choices = tbl(sql_db, "GRN_nodes") %>% pull(id),
     selected = "Runx1", server = TRUE)
 
+  observeEvent(input$rna_help, {
+    shinyalert(title = "RNA-seq tab", text = help1)
+  })
+  observeEvent(input$atac_help, {
+    shinyalert(title = "ATAC-seq tab", text = help2)
+  })
+  observeEvent(input$net_help, {
+    shinyalert(title = "Network tab", text = help3)
+  })
+  observeEvent(input$coop_help, {
+    shinyalert(title = "Cooperation tab", text = help4)
+  })
+
   ### Action button event handling
   ### On button click, subset samples and calculate PCA
   expression_data <- reactive({
