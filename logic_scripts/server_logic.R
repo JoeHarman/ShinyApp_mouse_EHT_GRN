@@ -212,10 +212,12 @@ function(input, output, session) {
         stat_summary(fun.data = mean_se, geom = "errorbar", width = 0.2) +
         geom_point(position = position_jitter(width = 0.2, seed = 12345)) +
         ggtitle(input$gene) +
+        xlab("") +
         scale_fill_manual(
           values = col_scheme[[as.numeric(input$RNA_exprs_anno)]]) +
         theme_classic() +
-      theme(text = element_text(size = 21))
+        theme(text = element_text(size = 21),
+          axis.text.x = element_text(angle = 45, vjust = 1, hjust=1))
   })
 
   # ATAC expression plot
@@ -240,10 +242,12 @@ function(input, output, session) {
         stat_summary(fun.data = mean_se, geom = "errorbar", width = 0.2) +
         geom_point(position = position_jitter(width = 0.2, seed = 12345)) +
         ggtitle(input$enhancer) +
+        xlab("") +
         scale_fill_manual(
           values = col_scheme[[as.numeric(input$ATAC_exprs_anno)]]) +
         theme_classic() +
-      theme(text = element_text(size = 21))
+        theme(text = element_text(size = 21),
+          axis.text.x = element_text(angle = 45, vjust = 1, hjust=1))
   })
 
   # RNA PCA plot
