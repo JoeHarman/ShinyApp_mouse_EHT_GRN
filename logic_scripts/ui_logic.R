@@ -5,7 +5,7 @@ navbarPage(
 
 ui <- fluidPage(theme = shinytheme("flatly"), # shinythemes::themeSelector(),
 
-  titlePanel("EHT GRN app"),
+  titlePanel("Gene regulatory network analysis of embryonic mouse EHT"),
 
   sidebarLayout(
 
@@ -35,7 +35,11 @@ ui <- fluidPage(theme = shinytheme("flatly"), # shinythemes::themeSelector(),
 
     ##### MAIN PANEL CODE #####
     mainPanel(tabsetPanel(
-
+      ### RNA panel code ###
+      tabPanel("About",
+        br(),
+        HTML(about_txt)
+      ),
       ### RNA panel code ###
       tabPanel("RNA",
 

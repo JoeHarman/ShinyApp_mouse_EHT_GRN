@@ -1,0 +1,19 @@
+<right><img src="model.png" width="40%" style="float: right; padding: 50px 50px 50px 50px;"></right>
+<header>
+    <h2>About this application</h2>
+    <br>
+    <p>This Shiny app was designed to accompany the publication [[link]], and offers a user interface to browse the related datasets as well as a gene regulatory network (GRN) model of EHT. Please use the tabs above to navigate the different datasets available.</p>
+
+    <p>Instructions are available using the buttons in the left sidebar.</p>
+
+    <p>The app was designed by Joe Harman, and the code is available here [[link]]. Raw sequencing data can be downloaded from GEO [[link]].</p>
+</header>
+<br>
+<hr style="height:2px;border-width:0;color:gray;background-color:gray">
+<br>
+
+<p>These data consist of mini-bulk RNA-seq and ATAC-seq analyses for embryonic mouse EHT populations. These consisted of E8.5 to E10.5 embryos, on endothelial cells (EC), hemogenic endothelium (HE), pro-HSC, and pre-HSC type I and type II. Samples used in the publication, and upon which statistics were calculated, consisted of E8.5 EC, E8.5 HE, E9.5 HE, E9.5 pro-HSC, E10.5 pre-HSC type I, and E10.5 pre-HSC type II.</p>
+
+<p>The GRN model describing EHT was generated through annotating differentially accessible ATAC-seq peaks to differentially expressed genes (RNA-seq), then connecting gene expression to upstream regulators via motif analysis of the cis-regulatory elements. These links were robustly filtered using correlative measures. Please see publication for details. Further, the network was divided into different modules based on gene expression patterns (see figure). This resulting network can be explored using the network tab, above.</p>
+
+<p>Please direct any questions regarding this website to: [[which e-mail?]].</p>

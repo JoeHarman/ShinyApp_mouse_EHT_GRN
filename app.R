@@ -59,6 +59,7 @@ col_scheme <- list(
 names(col_scheme$Group) <- unique(pull(tbl(sql_db, "RNA_exprs"), Group))
 
 # Text
+about_txt <- read_file("./Text/about.txt")
 help1 <- read_file("./Text/help-1.txt")
 help2 <- read_file("./Text/help-2.txt")
 help3 <- read_file("./Text/help-3.txt")
@@ -72,8 +73,6 @@ font_size <- 18
 # Load ui and server scripts
 ui <- source("./logic_scripts/ui_logic.R",  local = TRUE)$value
 server <- source("./logic_scripts/server_logic.R",  local = TRUE)$value
-
-
 
 # Create shiny app
 shinyApp(secure_app(ui), server)
