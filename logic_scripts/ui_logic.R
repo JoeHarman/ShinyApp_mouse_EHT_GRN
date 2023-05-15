@@ -23,6 +23,14 @@ ui <- fluidPage(theme = shinytheme("flatly"), # shinythemes::themeSelector(),
         color = "warning", size = "sm"), br(),
       actionBttn("coop_help", "Cooperation tab", style = "stretch",
         color = "warning", size = "sm"),
+      bsModal("rna_help_b", "RNA-seq analysis", "rna_help",
+        size = "large", HTML(help1)),
+      bsModal("atac_help_b", "ATAC-seq analysis", "atac_help",
+        size = "large", HTML(help2)),
+      bsModal("net_help_b", "Network analysis", "net_help",
+        size = "large", HTML(help3)),
+      bsModal("coop_help_b", "Cooperation analysis", "coop_help",
+        size = "large", HTML(help4)),
     width = 2),
 
     ##### MAIN PANEL CODE #####
@@ -41,9 +49,9 @@ ui <- fluidPage(theme = shinytheme("flatly"), # shinythemes::themeSelector(),
             radioButtons(
               "RNA_exprs_anno", "Colour annotation:", inline = TRUE,
               choices = c(
-                "Population" = 1,
-                "Stage" = 2,
-                "Sample" = 3)
+                "Cell population" = 1,
+                "Embryo stage" = 2,
+                "Sample name" = 3)
             )
           ),
           column(4,
@@ -51,7 +59,8 @@ ui <- fluidPage(theme = shinytheme("flatly"), # shinythemes::themeSelector(),
               "Top variable genes for PCA calculation:",
               min = 0,
               max = length(pull(tbl(sql_db, "RNA_exprs_wide"), GeneID)),
-              value = length(pull(tbl(sql_db, "RNA_exprs_wide"), GeneID)))
+              value = length(pull(tbl(sql_db, "RNA_exprs_wide"), GeneID))),
+            bsTooltip("RNA_topn", tooltips[19])
           ),
           column(2,
             actionButton(inputId = "runPCA_RNA", label = "Run PCA (slow!)")
@@ -91,9 +100,9 @@ ui <- fluidPage(theme = shinytheme("flatly"), # shinythemes::themeSelector(),
             radioButtons(
               "ATAC_exprs_anno", "Colour annotation:", inline = TRUE,
               choices = c(
-                "Population" = 1,
-                "Stage" = 2,
-                "Sample" = 3)
+                "Cell population" = 1,
+                "Embryo stage" = 2,
+                "Sample name" = 3)
             )
           ),
           column(4,
@@ -103,7 +112,8 @@ ui <- fluidPage(theme = shinytheme("flatly"), # shinythemes::themeSelector(),
               min = 0,
               max = 10000,
               #length(pull(tbl(sql_db, "ATAC_exprs_wide"), peak_coord)),
-              value = 5000)
+              value = 5000),
+            bsTooltip("ATAC_topn", tooltips[19])
           ),
           column(2,
             actionButton(inputId = "runPCA_ATAC", label = "Run PCA (slow!)")
@@ -141,8 +151,10 @@ ui <- fluidPage(theme = shinytheme("flatly"), # shinythemes::themeSelector(),
             br(),
             radioGroupButtons(inputId = "grn_mode", label = "Plot mode:",
               choices = c("Central TFs", "Upstream", "Downstream")),
-            shinyWidgets::prettySwitch("grn_tf", label = "Show TFs only",
-              value = TRUE, fill = TRUE)
+            radioTooltip("grn_mode", "Central TFs", tooltips[15]),
+            radioTooltip("grn_mode", "Upstream", tooltips[16]),
+            radioTooltip("grn_mode", "Downstream", tooltips[17]),
+            bsTooltip("makeGRN", tooltips[18])
           ),
           column(3,
             radioButtons(
@@ -152,6 +164,20 @@ ui <- fluidPage(theme = shinytheme("flatly"), # shinythemes::themeSelector(),
               selected = "Full",
               inline = TRUE
             ),
+            shinyWidgets::prettySwitch("grn_tf", label = "Show TFs only",
+              value = TRUE, fill = TRUE),
+            radioTooltip("grn_subset", "Full", tooltips[8]),
+            radioTooltip("grn_subset", "RNA1", tooltips[9]),
+            radioTooltip("grn_subset", "RNA2", tooltips[10]),
+            radioTooltip("grn_subset", "RNA3", tooltips[11]),
+            radioTooltip("grn_subset", "RNA4", tooltips[12]),
+            radioTooltip("grn_subset", "RNA5", tooltips[13]),
+            bsTooltip("grn_tf", tooltips[14])
+          ),
+          column(3,
+            sliderInput("top_n_centrality",
+              "# top-most central:",
+              min = 1, max = 316, value = 25),
             radioButtons(
               "grn_centrality",
               "Centrality measure:",
@@ -161,14 +187,16 @@ ui <- fluidPage(theme = shinytheme("flatly"), # shinythemes::themeSelector(),
                 "Authority score" = "authority_score"),
               selected = "degree",
               inline = TRUE
-            )
-            # NOTE - still want a TF toggle for the downstream analysis.
-            # Maybe toggle for top-n or downstream?
-          ),
-          column(3,
-            sliderInput("top_n_centrality",
-              "# top-most central:",
-              min = 1, max = 316, value = 25)
+            ),
+            # Tooltips
+            radioTooltip("grn_centrality", "degree", tooltips[1]),
+            radioTooltip("grn_centrality", "betweenness", tooltips[2]),
+            radioTooltip("grn_centrality", "closeness", tooltips[3]),
+            radioTooltip("grn_centrality", "eigenvector", tooltips[4]),
+            radioTooltip("grn_centrality", "hub_score", tooltips[5]),
+            radioTooltip("grn_centrality", "authority_score", tooltips[6]),
+            bsTooltip("top_n_centrality", tooltips[7])
+
           ),
           column(3,
             selectizeInput("core_node", "Reference node:",

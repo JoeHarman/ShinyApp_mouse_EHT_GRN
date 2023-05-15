@@ -18,3 +18,29 @@ remove_isolated <- function(net) {
   net <- delete.vertices(net, Isolated)
   return(net)
 }
+
+# Tooltip over checkboxes
+radioTooltip <- function(id, choice, title,
+  placement = "bottom", trigger = "hover", options = NULL) {
+  require(shinyBS)
+
+  options <- shinyBS:::buildTooltipOrPopoverOptionsList(
+    title, placement, trigger, options)
+  options <- paste0("{'", paste(
+    names(options), options, sep = "': '", collapse = "', '"), "'}")
+
+  bs_tag <- shiny::tags$script(shiny::HTML(paste0("
+    $(document).ready(function() {
+      setTimeout(function() {
+        $('input', $('#", id, "')).each(function(){
+          if(this.getAttribute('value') == '", choice, "') {
+            opts = $.extend(", options, ", {html: true});
+            $(this.parentElement).tooltip('destroy');
+            $(this.parentElement).tooltip(opts);
+          }
+        })
+      }, 500)
+    });
+  ")))
+  htmltools::attachDependencies(bs_tag, shinyBS:::shinyBSDep)
+}

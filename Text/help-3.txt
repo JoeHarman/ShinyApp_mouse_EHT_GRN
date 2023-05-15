@@ -1,0 +1,27 @@
+The gene regulatory network (GRN) describing EHT was generated through annotating differentially accessible ATAC-seq peaks to differentially expressed genes (RNA-seq), then connecting gene expression to upstream regulators via motif analysis of the cis-regulatory elements. These links were robustly filtered using correlative measures. Please see publication for details.
+<br>
+<br>
+This tab serves as a simple GRN browser, and consists of three modes:
+<ul>
+<li>Central TFs - Plot the top nodes of the GRN, or sub-network, by the specified centrality parameter.</li>
+<li>Upstream - Plot the predicted upstream regulators of a reference node.</li>
+<li>Downstream - Plot the predicted downstream targets of a reference node.</li>
+</ul>
+<br>
+The network visualisations can be executed with the "Make GRN" button. Network nodes can be clicked and dragged, and once clicked will highlight upstream and downstream nodes. A table of interactions based on the current network view can be downloaded using the "Export" button.
+<br>
+<br>
+Each plotting mode shows an accompanying side plot:
+<ul>
+<li>Central TFs - Side plot shows the top 20 most central nodes (using the selected centrality measure).</li>
+<li>Upstream/Downstream - Side plot shows the top 20 nodes most correlated (or anti-correlated) with the reference node, by RNA-seq.</li>
+</ul>
+<br>
+Network parameters and filters:
+<ul>
+<li>By default, only transcription factors are shown ("show TFs only" toggle).</li>
+<li>GRN subset: filter nodes by RNA expression module (See about page, hover over options for description).</li>
+<li>Centrality measure: Type of centrality to use when in "Central TFs" mode. Network node size is also scaled to the centrality measure.</li>
+<li>Top-most central: How many central nodes to plot when in "Central TFs" mode.</li>
+<li>Side plot options: Choose whether to plot the top genes that are correlated, or anti-correlated, with the reference node (by gene expression).</li>
+</ul>

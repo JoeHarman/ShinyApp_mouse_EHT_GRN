@@ -1,0 +1,10 @@
+The RNA-seq analysis consists of EHT populations from E8.5, E9.5 and E10.5 mouse embryos. Statistics were performed on a specific panel of samples: E8.5 EC, E8.5 HE, E9.5 HE, E9.5 pro-HSC, E10.5 pre-HSC type I, and E10.5 pre-HSC type II. 
+<br>
+<br>
+These data can be navigated as follows:
+<ul>
+<li>A gene expression plot is shown, and different genes can be selected using the dropdown box. Only differentially expressed genes are listed.</li>
+<li>To control which samples are included in the plot, use the checkboxes in the left sidebar.</li>
+<li>PCA analysis of the data is shown. Additionally, the loading contribution of the selected gene is also indicated in red. The PCA can be recalculated based on the selected samples using the top-right button, but this can be slow. Note that the number of genes used as PCA input can be adjusted with the slider, but this may limit the genes available for PCA loading visualisation.</li>
+<li>A full, filterable table is available at the bottom and filtered data can be downloaded as a .CSV file. Please see the publication to download the full table.</li>
+</ul>

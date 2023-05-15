@@ -5,7 +5,7 @@ library(shinymanager)
 library(shinyWidgets)
 library(shinythemes)
 library(shinycssloaders)
-library(shinyalert)
+library(shinyBS)
 library(htmlwidgets)
 library(readr)
 library(dplyr)
@@ -58,14 +58,16 @@ col_scheme <- list(
 )
 names(col_scheme$Group) <- unique(pull(tbl(sql_db, "RNA_exprs"), Group))
 
-# Parameters
-font_size <- 18
-
 # Text
 help1 <- read_file("./Text/help-1.txt")
-help2 <- read_file("./Text/help-1.txt")
-help3 <- read_file("./Text/help-1.txt")
-help4 <- read_file("./Text/help-1.txt")
+help2 <- read_file("./Text/help-2.txt")
+help3 <- read_file("./Text/help-3.txt")
+help4 <- read_file("./Text/help-4.txt")
+tooltips <- read_tsv("Text/tooltips.txt", col_names = FALSE, comment = "#") %>%
+  unlist()
+
+# Parameters
+font_size <- 18
 
 # Load ui and server scripts
 ui <- source("./logic_scripts/ui_logic.R",  local = TRUE)$value

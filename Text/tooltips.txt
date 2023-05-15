@@ -1,0 +1,38 @@
+# 1 grn_centrality - degree
+Number of connections to a node
+# 2 grn_centrality - betweenness
+Frequency at which a node is part of a shortest path between two other nodes. High values indicate bottlenecks 
+# 3 grn_centrality - closeness
+The average length of shortest paths from a node to each other node 
+# 4 grn_centrality - eigenvector
+Node influence measure. High scores reflect nodes that are connected to many high scoring nodes 
+# 5 grn_centrality - hub_score
+Kleinbergs hub score. Hub score is equal to the sum of authority scores of nodes it points towards. High scores reflect nodes that connect to high authority targets
+# 6 grn_centrality - authority_score
+Kleinbergs authority score. Authority is equal to the sum of hub scores that point towards it. High scores reflect highly regulated targets
+# 7 top_n_centrality
+Number of most-central nodes to plot
+# 8 grn_subset - Full
+Full network
+# 9 grn_subset - RNA1
+Transient HE/pro-HSC depleted
+# 10 grn_subset - RNA2
+Endothelial expression
+# 11 grn_subset - RNA3
+Transient HE/pro-HSC enriched
+# 12 grn_subset - RNA4
+Early haematopoietic specification (upregulated in pro-HSC)
+# 13 grn_subset - RNA5
+late haematopoietic specification (upregulated in pre-HSC I/II)
+# 14 grn_tf
+Plot only TF nodes? (ignored for Central TFs mode)
+# 15 grn_mode - Central TFs
+Plot most central TF nodes of network
+# 16 grn_mode - Upstream
+Plot all upstream regulators of reference node
+# 17 grn_mode - Downstream
+Plot all downstream targets of reference node
+# 18 makeGRN
+Plot network. Click this to execute selected settings
+# 19 ATAC_topn / RNA_topn
+Select top-variable genes as input for PCA analysis. Lower is quicker, but may restrict gene loading visualisation.
