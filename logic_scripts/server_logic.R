@@ -411,6 +411,7 @@ function(input, output, session) {
       left_join(collect(edges))
     grn_list$nodes <- n
     grn_list$col_select <- col_select
+    grn_list$plot_mode <- input$grn_mode
 
 
     ### Return data
@@ -469,19 +470,20 @@ function(input, output, session) {
     n <- grn_list()$nodes
     e <- grn_list()$edges
     col_select <- grn_list()$col_select
+    plot_mode <- grn_list()$plot_mode
 
-    if (input$grn_mode == "Central TFs") {
+    if (plot_mode == "Central TFs") {
       net_topn <- n %>%
         select(id:RNA_module, Centrality = col_select) %>%
         top_n(20, Centrality) %>%
-        arrange((Centrality)) %>%
-        mutate(id = factor(id, levels = (id)))
+        arrange(Centrality) %>%
+        mutate(id = factor(id, levels = id))
 
       net_topn_plot <- ggplot(net_topn,
         aes(x = Centrality, y = id, fill = RNA_module)) +
         xlab(gsub("_", " ", col_select))
 
-    } else if (input$grn_mode == "Upstream") {
+    } else if (plot_mode == "Upstream") {
       net_topn <- e %>%
         select(id = from, RNA_correlation) %>%
         left_join(n) %>%
