@@ -1,4 +1,4 @@
-<right><img src="model.png" width="40%" style="float: right; padding: 50px 50px 50px 50px;"></right>
+<right><img src="model.png" width="40%" style="float: right; padding: 20px 20px 20px 20px;"></right>
 <header>
     <h2>About this application</h2>
     <br>

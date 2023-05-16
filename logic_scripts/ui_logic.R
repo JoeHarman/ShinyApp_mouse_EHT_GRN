@@ -148,8 +148,8 @@ ui <- fluidPage(theme = shinytheme("flatly"), # shinythemes::themeSelector(),
 
         # Annotations row
         wellPanel(fluidRow(
+
           column(3,
-            # INPUT COMMAND
             actionButton(inputId = "makeGRN", label = "Make GRN"),
             downloadButton("downGRN", "Export"),
             br(),
@@ -208,14 +208,6 @@ ui <- fluidPage(theme = shinytheme("flatly"), # shinythemes::themeSelector(),
             radioGroupButtons(inputId = "corr_filt",
               label = "Side plot options:",
               choices = c("Top-20 correlated", "Top-20 anti-correlated"))
-          ),
-          column(3,
-            # INPUT COMMAND
-            # SUBSETTING - TOP20 RNA1-5, UPSTREAM, DOWNSTREAM
-          ),
-          column(3,
-            # INPUT COMMAND
-            # Top-centrality - degree/betweenness... for subset?
           )
         )),
 
@@ -229,6 +221,35 @@ ui <- fluidPage(theme = shinytheme("flatly"), # shinythemes::themeSelector(),
           column(3, h3("Top nodes"),
             plotOutput("networkSidePlot", height = "70vh") %>%
               withSpinner(type = 5, color = "#0dc5c1")
+          )
+        )
+      ),
+
+      ### Cooperation panel code ###
+      tabPanel("Cooperation",
+
+        # Annotations row
+        wellPanel(fluidRow(
+          column(3,
+          ),
+          column(3,
+          ),
+          column(3,
+          ),
+          column(3,
+          )
+        )),
+
+        # Plots row
+        fluidRow(
+          column(9, h3("Network"),
+            #visNetworkOutput("mynetworkid", height = "70vh") %>%
+            #  withSpinner(type = 5, color = "#0dc5c1")
+          ),
+
+          column(3, h3("Top nodes"),
+            #plotOutput("networkSidePlot", height = "70vh") %>%
+            #  withSpinner(type = 5, color = "#0dc5c1")
           )
         )
       )
