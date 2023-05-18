@@ -7,5 +7,5 @@ These data can be navigated as follows:
 <li>Tip! Use the bottom table to find enhancer elements associated with your gene of interest.</li>
 <li>To control which samples are included in the plot, use the checkboxes in the left sidebar.</li>
 <li>PCA analysis of the data is shown. Additionally, the loading contribution of the selected cis-element is also indicated in red. The PCA can be recalculated based on the selected samples using the top-right button, but this can be slow. Note that the number of elements used as PCA input can be adjusted with the slider, but this may limit the elements available for PCA loading visualisation.</li>
-<li>A full, filterable table is available at the bottom and filtered data can be downloaded as a .CSV file.</li>
+<li>A full, filterable table is available at the bottom and filtered data can be downloaded as a .CSV file. FDR represents results of an ANOVA-like test (comparing the samples specified above) within EdgeR.</li>
 </ul>

@@ -6,10 +6,10 @@
 
     <p>Instructions are available using the buttons in the left sidebar.</p>
 
-    <p>The app was designed by Joe Harman (https://orcid.org/0000-0003-3668-1859).</p>
-    <p>Code to build this app is available on github [[link]]. Raw sequencing data can be downloaded from GEO [[link]].</p>
-    <p>Processed datasets used in this app is available here [[link]].</p>
-    <p>Raw sequencing data can be downloaded from GEO [[link]].</p>
+    <p>The app was designed by Joe Harman  <a href="https://orcid.org/0000-0003-3668-1859" target="_blank">(orcid 0000-0003-3668-1859)</a>.</p>
+    <p>Code to build this app is available on <a href="https://github.com/JoeHarman/ShinyApp_EHT-GRN" target="_blank">github</a>.</p>
+    <p>Processed datasets used in this app are available on <a href="" target="_blank">figshare</a>, DOI: <insert DOI></p>
+    <p>Raw sequencing data can be downloaded from <a href="" target="_blank">GEO</a>.</p>
 </header>
 <br>
 <hr style="height:2px;border-width:0;color:gray;background-color:gray">
