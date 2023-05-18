@@ -28,6 +28,15 @@ credentials <- data.frame(
   stringsAsFactors = FALSE
 )
 
+# Use if file exists = F
+# download.file(url = "https://figshare.com/ndownloader/articles/5799222/versions/1",   destfile = "./data/test.zip")
+# unzip("./data/test.zip")
+# if(file.exists("./1_ElementsQuery.sql")){print("AWESOMEAWESOMEAWESOME")}else{"BADBADBAD"}
+# file.remove("./data/test.zip")
+# file.remove("./1_ElementsQuery.sql")
+# file.remove("./ElementsSample_3.csv")
+# file.remove("./sy.PNG")
+
 # Source functions
 source("./logic_scripts/functions.R")
 
@@ -42,12 +51,11 @@ pca_tables <- readRDS("./data/PCA_tables.rds")
 sql_db <- DBI::dbConnect(RSQLite::SQLite(), dbname = "./data/SQL_DB.sqlite")
 
 # Useful variables
-samples <- readRDS("./data/vect_list.rds")$samples %>%
-  as.character()
-deg <- readRDS("./data/vect_list.rds")$deg %>%
-  as.character()
-dae <- readRDS("./data/vect_list.rds")$dae %>%
-  as.character()
+
+samples <- as.character(unique(RNA_anno$Group))
+names(samples) <- samples
+deg <- as.character(RNA_stats$GeneID)
+dae <- as.character(ATAC_stats$peak_coord)
 
 # Colour schemes
 col_scheme <- list(
