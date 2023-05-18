@@ -36,3 +36,7 @@ Plot all downstream targets of reference node
 Plot network. Click this to execute selected settings
 # 19 ATAC_topn / RNA_topn
 Select top-variable genes as input for PCA analysis. Lower is quicker, but may restrict gene loading visualisation.
+# 20 TF_A
+Select a TF for cooperation results. TF A also controls top-cooperation plots.
+# 21 TF_B
+Select a TF for cooperation results.

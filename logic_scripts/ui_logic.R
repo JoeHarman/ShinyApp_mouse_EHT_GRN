@@ -231,6 +231,12 @@ ui <- fluidPage(theme = shinytheme("flatly"), # shinythemes::themeSelector(),
         # Annotations row
         wellPanel(fluidRow(
           column(3,
+            selectizeInput("TF_A", "TF A:",
+              choices = NULL), br(),
+            selectizeInput("TF_B", "TF B:",
+              choices = NULL),
+            bsTooltip("TF_A", tooltips[20]),
+            bsTooltip("TF_B", tooltips[21])
           ),
           column(3,
           ),
@@ -243,8 +249,8 @@ ui <- fluidPage(theme = shinytheme("flatly"), # shinythemes::themeSelector(),
         # Plots row
         fluidRow(
           column(9, h3("Network"),
-            #visNetworkOutput("mynetworkid", height = "70vh") %>%
-            #  withSpinner(type = 5, color = "#0dc5c1")
+            plotOutput("coop_exprs") %>%
+              withSpinner(type = 5, color = "#0dc5c1", hide.ui = FALSE)
           ),
 
           column(3, h3("Top nodes"),

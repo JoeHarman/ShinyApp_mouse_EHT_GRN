@@ -16,6 +16,15 @@ function(input, output, session) {
     choices = tbl(sql_db, "GRN_nodes") %>% pull(id),
     selected = "Runx1", server = TRUE)
 
+  updateSelectizeInput(session, "TF_A",
+    choices = tbl(sql_db, "GRN_nodes") %>% filter(is_TF == 1) %>% pull(id),
+    selected = "Runx1", server = TRUE)
+
+  updateSelectizeInput(session, "TF_B",
+    choices = tbl(sql_db, "GRN_nodes") %>% filter(is_TF == 1) %>% pull(id),
+    selected = "Ikzf1", server = TRUE)
+
+
   ### Action button event handling
   ### On button click, subset samples and calculate PCA
   expression_data <- reactive({
@@ -531,5 +540,27 @@ function(input, output, session) {
 
   })
 
+  # Cooperation expression plot
+  output$coop_exprs <- renderPlot({
+    TF_A <- input$TF_A
+    TF_B <- input$TF_B
+    exprs <- expression_data()$RNA_exprs %>%
+      dplyr::filter(GeneID %in% c(TF_A, TF_B)) %>%
+      collect() %>%
+      mutate(Group = factor(Group, levels = unique(Group)))
+
+      ggplot(exprs, aes(x = Group, y = CPM, fill = GeneID)) +
+        stat_summary(fun.y = mean, geom = "bar", col = "black",
+          position = position_dodge()) +
+        stat_summary(fun.data = mean_se, geom = "errorbar", width = 0.2,
+          position = position_dodge(width = 0.9)) +
+        geom_point(position = position_jitterdodge(
+          jitter.width = 0.2, dodge.width = 0.9, seed = 12345)) +
+        ggtitle(paste0(TF_A, " and ", TF_B)) +
+        xlab("") +
+        theme_classic() +
+        theme(text = element_text(size = font_size),
+          axis.text.x = element_text(angle = 45, vjust = 1, hjust = 1))
+  })
 
 }

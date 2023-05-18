@@ -30,7 +30,7 @@ credentials <- data.frame(
 
 # Use if file exists = F
 # download.file(url = "https://figshare.com/ndownloader/articles/5799222/versions/1",   destfile = "./data/test.zip")
-# unzip("./data/test.zip")
+# unzip("./data/test.zip", exdest = "data")
 # if(file.exists("./1_ElementsQuery.sql")){print("AWESOMEAWESOMEAWESOME")}else{"BADBADBAD"}
 # file.remove("./data/test.zip")
 # file.remove("./1_ElementsQuery.sql")
@@ -48,7 +48,8 @@ ATAC_anno <- readRDS("./data/ATAC_anno.rds")
 
 pca_tables <- readRDS("./data/PCA_tables.rds")
 
-sql_db <- DBI::dbConnect(RSQLite::SQLite(), dbname = "./data/SQL_DB.sqlite")
+sql_db <- DBI::dbConnect(RSQLite::SQLite(),
+  dbname = "./data/RNA_ATAC_expression_and_GRN_tables.sqlite")
 
 # Useful variables
 
