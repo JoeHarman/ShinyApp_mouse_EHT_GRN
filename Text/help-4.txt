@@ -1,10 +1,13 @@
-This is a help message.
+This tab allows the exploration of the cooperativity analysis between pairs of TFs.
 <br>
 <br>
-
+Cooperation was assessed for every pair of TFs in the GRN. The predicted cis-regulatory targets of each pair of TFs was compared using a Fisher's exact test, such that significant results with odds ratio scores above 1 reflect TFs that interact at the same cis-regulatory elements more-so than if these interactions were to be randomly assigned. This we refer to as "co-interaction" and suggests cooperativity between the TFs. Please see publication for details. Note that P-values were corrected using the Benjamini–Hochberg method.
+<br>
+<br>
+These data can be navigated as follows:
 <ul>
-<li>Item 1.</li>
-<li>Item 2.</li>
-<li>Item 3.</li>
-<li>Item 4.</li>
+<li>Select a TF of interest as "TF A". This shows a plot of all other TFs for co-interaction significance vs RNA correlation with TF A.</li>
+<li>Select a candidate partner TF as "TF B". This will be highlighted on the co-interaction vs RNA correlation plot in red. Additionally, gene expression information comparing TFs A and B is shown.</li>
+<li>The left table shows the full set of results from the co-interaction analysis. Note that TF A and B in this table are non-redundant, such that both columns may need to be searched to identify TF pairs of interest.</li>
+<li>The right table shows the predicted gene targets of both TF A and TF B.</li>
 </ul>
