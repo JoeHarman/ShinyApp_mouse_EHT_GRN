@@ -80,7 +80,7 @@ tooltips <- read_tsv("Text/tooltips.txt", col_names = FALSE, comment = "#") %>%
   unlist()
 
 # Parameters
-font_size <- 18
+font_size <- 15
 
 # Load ui and server scripts
 ui <- source("./logic_scripts/ui_logic.R",  local = TRUE)$value
