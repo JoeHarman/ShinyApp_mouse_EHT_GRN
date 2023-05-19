@@ -241,21 +241,28 @@ ui <- fluidPage(theme = shinytheme("flatly"), # shinythemes::themeSelector(),
           column(3,
           ),
           column(3,
-          ),
-          column(3,
           )
         )),
 
         # Plots row
         fluidRow(
-          column(9, h3("Network"),
-            plotOutput("coop_exprs") %>%
-              withSpinner(type = 5, color = "#0dc5c1", hide.ui = FALSE)
+          column(6, h3("Top TFs co-interacting with TF A"),
+            plotlyOutput("coop_top", height = "40vh") %>%
+              withSpinner(type = 5, color = "#0dc5c1")
           ),
-
-          column(3, h3("Top nodes"),
-            #plotOutput("networkSidePlot", height = "70vh") %>%
-            #  withSpinner(type = 5, color = "#0dc5c1")
+          column(6, h3("TF A + TF B comparison"),
+            plotOutput("coop_exprs", height = "40vh") %>%
+              withSpinner(type = 5, color = "#0dc5c1", hide.ui = FALSE)
+          )
+        ),
+        fluidRow(
+          column(6, h3("Co-interaction stats (full table)"),
+            DT::dataTableOutput("coop_stats_tbl", width = "90%") %>%
+              withSpinner(type = 5, color = "#0dc5c1")
+          ),
+          column(6, h3("TF A & B target genes"),
+            DT::dataTableOutput("coop_target_tbl", width = "90%") %>%
+              withSpinner(type = 5, color = "#0dc5c1")
           )
         )
       )

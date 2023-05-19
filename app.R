@@ -16,6 +16,7 @@ library(ggplot2)
 library(DESeq2)
 library(visNetwork)
 library(igraph)
+library(plotly)
 
 # Set up user passwords
 credentials <- data.frame(
@@ -47,6 +48,8 @@ RNA_anno <- readRDS("./data/RNA_anno.rds")
 ATAC_anno <- readRDS("./data/ATAC_anno.rds")
 
 pca_tables <- readRDS("./data/PCA_tables.rds")
+
+coop_stats <- readRDS("./data/Cointeraction_stats.rds")
 
 sql_db <- DBI::dbConnect(RSQLite::SQLite(),
   dbname = "./data/RNA_ATAC_expression_and_GRN_tables.sqlite")

@@ -310,11 +310,6 @@ function(input, output, session) {
   })
 
   # NETWORK PLOT
-  # Need a data grabber function and plot function
-  # Grabber handles SQL queries (maybe loads full nodes, subsets edges)...
-  # ...then possibly initialises visNetwork
-  # Plot function handles annotation adjustments, i.e, colour options.
-  # Maybe best for visNetwork to initialise here then... See how it works.
 
   # Process network button
   grn_list <- eventReactive(input$makeGRN, {
@@ -542,10 +537,10 @@ function(input, output, session) {
 
   # Cooperation expression plot
   output$coop_exprs <- renderPlot({
-    TF_A <- input$TF_A
-    TF_B <- input$TF_B
+    tf_a <- input$TF_A
+    tf_b <- input$TF_B
     exprs <- expression_data()$RNA_exprs %>%
-      dplyr::filter(GeneID %in% c(TF_A, TF_B)) %>%
+      dplyr::filter(GeneID %in% c(tf_a, tf_b)) %>%
       collect() %>%
       mutate(Group = factor(Group, levels = unique(Group)))
 
@@ -556,11 +551,124 @@ function(input, output, session) {
           position = position_dodge(width = 0.9)) +
         geom_point(position = position_jitterdodge(
           jitter.width = 0.2, dodge.width = 0.9, seed = 12345)) +
-        ggtitle(paste0(TF_A, " and ", TF_B)) +
+        ggtitle(paste0(tf_a, " and ", tf_b)) +
         xlab("") +
         theme_classic() +
         theme(text = element_text(size = font_size),
           axis.text.x = element_text(angle = 45, vjust = 1, hjust = 1))
   })
+
+  # Cooperation expression plot
+  output$coop_top <- renderPlotly({
+    tf_a <- input$TF_A
+    tf_b <- input$TF_B
+
+    df <- coop_stats %>%
+      filter(TF_A == tf_a | TF_B == tf_a) %>% 
+      # Need to ensure label is the partner TF, not selected TF
+      mutate(GeneID = paste0(TF_A, TF_B)) %>%
+      mutate(GeneID = gsub(tf_a, "", GeneID))
+
+    p <- ggplot(df, aes(y = -log10(Cointeraction_Pvalue), x = RNA_correlation,
+      label = GeneID)) +
+      geom_point(pch = 21, fill = "#996cd4") +
+      # Filter for partner TF_B and highlight in red
+      geom_point(data = filter(df, TF_A == tf_b | TF_B == tf_b),
+        pch = 21, fill = "red", size = 3) +
+      xlab(paste0("RNA correlation with ", tf_a)) +
+      ylab(paste("-log10 P-value for\nco-interaction with", tf_a)) +
+      theme_bw() +
+      theme(text = element_text(size = 16),
+        axis.text.x = element_text(angle = 45, vjust = 1, hjust = 1))
+
+    ggplotly(p)
+
+  })
+
+  # Cointeraction stats table
+  output$coop_stats_tbl <- DT::renderDataTable(
+    coop_stats,
+    options = list(
+      paging = TRUE,    ## paginate the output
+      pageLength = 10,  ## number of rows to output for each page
+      lengthMenu = c(10, 50, 100),
+      scrollX = TRUE,   ## enable scrolling on X axis
+      scrollY = TRUE,   ## enable scrolling on Y axis
+      autoWidth = TRUE, ## use smart column width handling
+      server = TRUE,   ## use client-side processing
+      dom = "lfrtiBp", # Alternative: dom = "Bfrtlip"
+      buttons = c("csv", "excel"),
+      formatter = list(
+        `E8-EC_E8-preHE_FDR` = p_formatter,
+        `E8-preHE_E9-HE_FDR` = p_formatter,
+        `E9-HE_E9-proHSC_FDR` = p_formatter,
+        `E9-proHSC_E10-preI_FDR` = p_formatter,
+        `E10-preI_E10-preII_FDR` = p_formatter
+      )
+    ),
+    extensions = "Buttons",
+    selection = "single",
+    filter = "top",
+    rownames = FALSE
+  )
+
+  # Cointeraction stats table
+
+  coop_target_tbl <- reactive({
+
+    tf_a <- input$TF_A
+    tf_b <- input$TF_B
+
+    tf_a_targets <- tbl(sql_db, "GRN_edges") %>%
+      filter(from == tf_a) %>% pull(to)
+    tf_b_targets <- tbl(sql_db, "GRN_edges") %>%
+      filter(from == tf_b) %>% pull(to)
+
+    joint_targets <- intersect(tf_a_targets, tf_b_targets)
+
+    tf_a_target_tbl <- tbl(sql_db, "GRN_edges") %>%
+      filter(to %in% joint_targets & from == tf_a) %>%
+      select(to, RNA_correlation) %>%
+      collect() %>%
+      purrr::set_names(c("GeneID", paste0("Correlation with ", tf_a)))
+
+    tf_b_target_tbl <- tbl(sql_db, "GRN_edges") %>%
+      filter(to %in% joint_targets & from == tf_b) %>%
+      select(to, RNA_correlation) %>%
+      collect() %>%
+      purrr::set_names(c("GeneID", paste0("Correlation with ", tf_b)))
+
+    inner_join(tf_a_target_tbl, tf_b_target_tbl) %>%
+      arrange(GeneID)
+
+  })
+
+  output$coop_target_tbl <- DT::renderDataTable(
+    coop_target_tbl(),
+    options = list(
+      paging = TRUE,    ## paginate the output
+      pageLength = 10,  ## number of rows to output for each page
+      lengthMenu = c(10, 50, 100),
+      scrollX = TRUE,   ## enable scrolling on X axis
+      scrollY = TRUE,   ## enable scrolling on Y axis
+      autoWidth = TRUE, ## use smart column width handling
+      server = TRUE,   ## use client-side processing
+      dom = "lfrtiBp", # Alternative: dom = "Bfrtlip"
+      buttons = c("csv", "excel"),
+      formatter = list(
+        `E8-EC_E8-preHE_FDR` = p_formatter,
+        `E8-preHE_E9-HE_FDR` = p_formatter,
+        `E9-HE_E9-proHSC_FDR` = p_formatter,
+        `E9-proHSC_E10-preI_FDR` = p_formatter,
+        `E10-preI_E10-preII_FDR` = p_formatter
+      )
+    ),
+    extensions = "Buttons",
+    selection = "single",
+    filter = "top",
+    rownames = FALSE
+  )
+
+
 
 }
