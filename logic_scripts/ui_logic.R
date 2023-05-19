@@ -230,28 +230,40 @@ ui <- fluidPage(theme = shinytheme("flatly"), # shinythemes::themeSelector(),
 
         # Annotations row
         wellPanel(fluidRow(
-          column(3,
+          column(4,
             selectizeInput("TF_A", "TF A:",
-              choices = NULL), br(),
+              choices = NULL),
+            bsTooltip("TF_A", tooltips[20])
+          ),
+          column(4,
             selectizeInput("TF_B", "TF B:",
               choices = NULL),
-            bsTooltip("TF_A", tooltips[20]),
             bsTooltip("TF_B", tooltips[21])
           ),
-          column(3,
-          ),
-          column(3,
+          column(4,
+            radioButtons(
+              "coop_subset",
+              "RNA module:",
+              c("All", "RNA1", "RNA2", "RNA3", "RNA4", "RNA5"),
+              selected = "All",
+              inline = TRUE
+            ),
+            radioTooltip("coop_subset", "RNA1", tooltips[9]),
+            radioTooltip("coop_subset", "RNA2", tooltips[10]),
+            radioTooltip("coop_subset", "RNA3", tooltips[11]),
+            radioTooltip("coop_subset", "RNA4", tooltips[12]),
+            radioTooltip("coop_subset", "RNA5", tooltips[13])
           )
         )),
 
         # Plots row
         fluidRow(
           column(6, h3("Top TFs co-interacting with TF A"),
-            plotlyOutput("coop_top", height = "40vh") %>%
+            plotlyOutput("coop_top", height = "40vh", width = "90%") %>%
               withSpinner(type = 5, color = "#0dc5c1")
           ),
           column(6, h3("TF A + TF B comparison"),
-            plotOutput("coop_exprs", height = "40vh") %>%
+            plotOutput("coop_exprs", height = "40vh", width = "90%") %>%
               withSpinner(type = 5, color = "#0dc5c1", hide.ui = FALSE)
           )
         ),

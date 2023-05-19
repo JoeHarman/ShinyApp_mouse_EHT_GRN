@@ -528,7 +528,8 @@ function(input, output, session) {
       ylab("") +
       theme_bw() +
       theme(text = element_text(size = font_size), legend.position = "bottom",
-        legend.direction = "vertical", legend.text = element_text(size = 15)) +
+        legend.direction = "vertical",
+        legend.text = element_text(size = font_size - 2)) +
       guides(fill = guide_legend(ncol = 2))
 
     return(net_topn_plot)
@@ -562,9 +563,23 @@ function(input, output, session) {
   output$coop_top <- renderPlotly({
     tf_a <- input$TF_A
     tf_b <- input$TF_B
+    module <- input$coop_subset
+
+    if (module != "All") {
+      gene_filt <- tbl(sql_db, "GRN_nodes") %>%
+        filter(RNA_module == module) %>%
+        pull(id)
+    } else {
+      gene_filt <- tbl(sql_db, "GRN_nodes") %>%
+        pull(id)
+    }
+
+    # TF A selection must always be in filter
+    gene_filt <- unique(c(tf_a, gene_filt))
 
     df <- coop_stats %>%
-      filter(TF_A == tf_a | TF_B == tf_a) %>% 
+      filter(TF_A %in% gene_filt & TF_B %in% gene_filt) %>%
+      filter(TF_A == tf_a | TF_B == tf_a) %>%
       # Need to ensure label is the partner TF, not selected TF
       mutate(GeneID = paste0(TF_A, TF_B)) %>%
       mutate(GeneID = gsub(tf_a, "", GeneID))
@@ -578,10 +593,17 @@ function(input, output, session) {
       xlab(paste0("RNA correlation with ", tf_a)) +
       ylab(paste("-log10 P-value for\nco-interaction with", tf_a)) +
       theme_bw() +
-      theme(text = element_text(size = 16),
+      theme(text = element_text(size = font_size),
         axis.text.x = element_text(angle = 45, vjust = 1, hjust = 1))
 
-    ggplotly(p)
+    ggplotly(p) %>%
+      layout(
+        xaxis = list(
+          title = list(font = list(size = font_size)),
+          tickfont = list(size = font_size - 2)),
+        yaxis = list(
+          title = list(font = list(size = font_size)),
+          tickfont = list(size = font_size - 2)))
 
   })
 
@@ -618,11 +640,16 @@ function(input, output, session) {
 
     tf_a <- input$TF_A
     tf_b <- input$TF_B
+    nodes <- tbl(sql_db, "GRN_nodes") %>%
+      select(GeneID = id, RNA_module) %>%
+      collect()
 
     tf_a_targets <- tbl(sql_db, "GRN_edges") %>%
-      filter(from == tf_a) %>% pull(to)
+      filter(from == tf_a) %>%
+      pull(to)
     tf_b_targets <- tbl(sql_db, "GRN_edges") %>%
-      filter(from == tf_b) %>% pull(to)
+      filter(from == tf_b) %>%
+      pull(to)
 
     joint_targets <- intersect(tf_a_targets, tf_b_targets)
 
@@ -639,7 +666,8 @@ function(input, output, session) {
       purrr::set_names(c("GeneID", paste0("Correlation with ", tf_b)))
 
     inner_join(tf_a_target_tbl, tf_b_target_tbl) %>%
-      arrange(GeneID)
+      arrange(GeneID) %>%
+      left_join(nodes)
 
   })
 
