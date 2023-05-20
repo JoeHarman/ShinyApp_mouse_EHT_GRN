@@ -1,11 +1,5 @@
 function(input, output, session) {
 
-  # Check_credentials returns a function to authenticate users
-  # Note - this should be removed in final release
-  res_auth <- secure_server(
-    check_credentials = check_credentials(credentials)
-  )
-
   updateSelectizeInput(session, "gene",
     choices = unique(deg), server = TRUE)
 

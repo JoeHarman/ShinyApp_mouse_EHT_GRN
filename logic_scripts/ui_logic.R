@@ -1,8 +1,3 @@
-navbarPage(
-  tags$h2("My secure application"),
-  verbatimTextOutput("auth_output")
-)
-
 ui <- fluidPage(theme = shinytheme("flatly"), # shinythemes::themeSelector(),
 
   titlePanel("Gene regulatory network analysis of embryonic mouse EHT"),

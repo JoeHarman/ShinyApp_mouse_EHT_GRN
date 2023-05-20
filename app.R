@@ -18,25 +18,13 @@ library(visNetwork)
 library(igraph)
 library(plotly)
 
-# Set up user passwords
-credentials <- data.frame(
-  user = c("jharman", "mdb_group"),
-  password = c("eht_is_cool", "shiny_eht"),
-  start = c("2023-04-19", "2023-04-19"),
-  expire = c(NA, NA),
-  admin = c(TRUE, FALSE),
-  comment = "Basic password protection",
-  stringsAsFactors = FALSE
-)
-
 # Use if file exists = F
-# download.file(url = "https://figshare.com/ndownloader/articles/5799222/versions/1",   destfile = "./data/test.zip")
-# unzip("./data/test.zip", exdest = "data")
-# if(file.exists("./1_ElementsQuery.sql")){print("AWESOMEAWESOMEAWESOME")}else{"BADBADBAD"}
-# file.remove("./data/test.zip")
-# file.remove("./1_ElementsQuery.sql")
-# file.remove("./ElementsSample_3.csv")
-# file.remove("./sy.PNG")
+if (!file.exists("./data/import.zip")) {
+  download.file(
+    url = "https://figshare.com/ndownloader/articles/22905005/versions/1",
+    destfile = "./data/import.zip")
+  unzip("./data/import.zip", exdir = "data")
+}
 
 # Source functions
 source("./logic_scripts/functions.R")
@@ -87,4 +75,4 @@ ui <- source("./logic_scripts/ui_logic.R",  local = TRUE)$value
 server <- source("./logic_scripts/server_logic.R",  local = TRUE)$value
 
 # Create shiny app
-shinyApp(secure_app(ui), server)
+shinyApp(ui, server)
