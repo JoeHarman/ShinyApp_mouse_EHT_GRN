@@ -6,10 +6,11 @@
 
     <p>Instructions are available using the buttons in the left sidebar.</p>
 
-    <p>The app was designed by Joe Harman  (<a href="https://orcid.org/0000-0003-3668-1859" target="_blank">orcid 0000-0003-3668-1859</a>).</p>
+    <p>ATACseq coverage tracks can be explored on <a href="https://genome-euro.ucsc.edu/s/JoeHarman/Harman_2023_EHT_ATACseq" target="_blank">UCSC</a>.</p>
     <p>Code to build this app is available on <a href="https://github.com/JoeHarman/ShinyApp_EHT-GRN" target="_blank">github</a>.</p>
     <p>Processed datasets used in this app are available on figshare: DOI <a href="https://doi.org/10.6084/m9.figshare.22905005.v1" target="_blank">DOI: 10.6084/m9.figshare.22905005.v1</a></p>
     <p>Raw sequencing data can be downloaded from GEO: <a href="https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE233057" target="_blank">GSE233057</a>.</p>
+    <p>The app was designed by Joe Harman  (<a href="https://orcid.org/0000-0003-3668-1859" target="_blank">orcid 0000-0003-3668-1859</a>).</p>
 </header>
 <br>
 <hr style="height:2px;border-width:0;color:gray;background-color:gray">
