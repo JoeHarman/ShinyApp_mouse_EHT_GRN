@@ -1,5 +1,6 @@
 function(input, output, session) {
 
+  ### SelectizeInput specification ###
   updateSelectizeInput(session, "gene",
     choices = unique(deg), server = TRUE)
 
@@ -18,46 +19,42 @@ function(input, output, session) {
     choices = tbl(sql_db, "GRN_nodes") %>% filter(is_TF == 1) %>% pull(id),
     selected = "Ikzf1", server = TRUE)
 
-
-  ### Action button event handling
-  ### On button click, subset samples and calculate PCA
+  ### Subset data based on selected samples ###
   expression_data <- reactive({
 
-    # Set selected groups to variable. Required step, as
-    # SQL database queries don't recognise input variables.
-    selected_groups <- unlist(input$select_groups)
+    selected_groups <- unlist(input$select_groups) # Req. for sql compatibility
 
-    ### Init list
     exprs_list <- list()
 
-    ### Process RNA expression data
+    # Subset RNA data
     exprs_list$RNA_exprs <- tbl(sql_db, "RNA_exprs") %>%
       dplyr::filter(Group %in% selected_groups)
 
-    ### Process ATAC expression data
+    # Subset ATAC data
     exprs_list$ATAC_exprs <- tbl(sql_db, "ATAC_exprs") %>%
       dplyr::filter(Group %in% selected_groups)
 
-    ### Return data
     return(exprs_list)
 
   })
 
+  ### PCA calculation action button ###
   run_pca_rna <- eventReactive(input$runPCA_RNA, {
 
-    # Set selected groups to variable. Required step, as
-    # SQL database queries don't recognise input variables.
-    selected_groups <- unlist(input$select_groups)
+    selected_groups <- unlist(input$select_groups) # Req. for sql compatibility
 
+    # If samples are set to default, load pre-calculated PCA results
     if (identical(selected_groups, samples[c(1, 2, 4, 5, 8, 9)])) {
+      print("Works")
       return(pca_tables$RNA)
     }
 
-    ### Calculate RNA PCA
+    # Filter expression data by selected samples
     select_ind <- c(1, grep(
       paste(selected_groups, collapse = "|"),
       colnames(tbl(sql_db, "RNA_exprs_wide"))))
 
+    # Perform VST transformation
     vsd <- tbl(sql_db, "RNA_exprs_wide") %>%
       dplyr::select(c(1, select_ind)) %>%
       collect() %>%
@@ -66,13 +63,17 @@ function(input, output, session) {
       round() %>%
       varianceStabilizingTransformation()
 
+    # Select top-n items for PCA calculation
     rv <- rowVars(vsd)
     select <- order(rv, decreasing = TRUE)[
       seq_len(min(input$RNA_topn, length(rv)))]
     vsd <- vsd[select, ]
 
+    # Run PCA
     rna_pca <- prcomp(t(vsd))
-    rm(vsd)
+
+    # Prune data to necessary for plotting
+    rm(vsd) # Remove to save memory
     rna_pca$x <- data.frame(rna_pca$x[, 1:2]) %>%
       rownames_to_column("Sample") %>%
       left_join(RNA_anno)
@@ -85,19 +86,19 @@ function(input, output, session) {
 
   run_pca_atac <- eventReactive(input$runPCA_ATAC, {
 
-    # Set selected groups to variable. Required step, as
-    # SQL database queries don't recognise input variables.
-    selected_groups <- unlist(input$select_groups)
+    selected_groups <- unlist(input$select_groups) # Req. for sql compatibility
 
+    # If samples are set to default, load pre-calculated PCA results
     if (identical(selected_groups, samples[c(1, 2, 4, 5, 8, 9)])) {
       return(pca_tables$ATAC)
     }
 
-    ### Calculate ATAC PCA
+    # Filter expression data by selected samples
     select_ind <- c(1, grep(
       paste(selected_groups, collapse = "|"),
       colnames(tbl(sql_db, "ATAC_exprs_wide"))))
 
+    # Perform VST transformation
     vsd <- tbl(sql_db, "ATAC_exprs_wide") %>%
       dplyr::select(c(1, select_ind)) %>%
       collect() %>%
@@ -107,13 +108,17 @@ function(input, output, session) {
       round() %>%
       varianceStabilizingTransformation()
 
+    # Select top-n items for PCA calculation
     rv <- rowVars(vsd)
     select <- order(rv, decreasing = TRUE)[
       seq_len(min(input$ATAC_topn, length(rv)))]
     vsd <- vsd[select, ]
 
+    # Run PCA
     atac_pca <- prcomp(t(vsd))
-    rm(vsd)
+
+    # Prune data to necessary for plotting
+    rm(vsd) # Remove to save memory
     atac_pca$x <- data.frame(atac_pca$x[, 1:2]) %>%
       rownames_to_column("Sample") %>%
       left_join(ATAC_anno)
@@ -125,26 +130,19 @@ function(input, output, session) {
   }, ignoreNULL = FALSE) # Allows processing on app startup
 
 
-  # RNA data table
+  ### RNA statistics DataTable
   output$RNA_stats_tbl <- DT::renderDataTable(
     RNA_stats,
     options = list(
-      paging = TRUE,    ## paginate the output
-      pageLength = 10,  ## number of rows to output for each page
+      paging = TRUE,
+      pageLength = 10,
       lengthMenu = c(10, 50, 100),
-      scrollX = TRUE,   ## enable scrolling on X axis
-      scrollY = TRUE,   ## enable scrolling on Y axis
-      autoWidth = TRUE, ## use smart column width handling
-      server = TRUE,   ## use client-side processing
-      dom = "lfrtiBp", # Alternative: dom = "Bfrtlip"
-      buttons = c("csv", "excel"),
-      formatter = list(
-        `E8-EC_E8-preHE_FDR` = p_formatter,
-        `E8-preHE_E9-HE_FDR` = p_formatter,
-        `E9-HE_E9-proHSC_FDR` = p_formatter,
-        `E9-proHSC_E10-preI_FDR` = p_formatter,
-        `E10-preI_E10-preII_FDR` = p_formatter
-      )
+      scrollX = TRUE,
+      scrollY = TRUE,
+      autoWidth = TRUE,
+      server = TRUE,
+      dom = "lfrtiBp",
+      buttons = c("csv", "excel")
     ),
     extensions = "Buttons",
     selection = "single",
@@ -152,27 +150,20 @@ function(input, output, session) {
     rownames = FALSE
   )
 
-  # ATAC data table
+  ### ATAC statistics DataTable
   output$ATAC_stats_tbl <- DT::renderDataTable(
     ATAC_stats,
     server = FALSE,
     options = list(
-      paging = TRUE,    ## paginate the output
-      pageLength = 10,  ## number of rows to output for each page
+      paging = TRUE,
+      pageLength = 10,
       lengthMenu = c(10, 50, 100),
-      scrollX = TRUE,   ## enable scrolling on X axis
-      scrollY = TRUE,   ## enable scrolling on Y axis
-      autoWidth = TRUE, ## use smart column width handling
-      server = TRUE,   ## use client-side processing
-      dom = "lfrtiBp", # Alternative: dom = "Bfrtlip"
-      buttons = c("csv", "excel"),
-      formatter = list(
-        `E8-EC_E8-preHE_FDR` = p_formatter,
-        `E8-preHE_E9-HE_FDR` = p_formatter,
-        `E9-HE_E9-proHSC_FDR` = p_formatter,
-        `E9-proHSC_E10-preI_FDR` = p_formatter,
-        `E10-preI_E10-preII_FDR` = p_formatter
-      )
+      scrollX = TRUE,
+      scrollY = TRUE,
+      autoWidth = TRUE,
+      server = TRUE,
+      dom = "lfrtiBp",
+      buttons = c("csv", "excel")
     ),
     extensions = "Buttons",
     selection = "single",
@@ -180,15 +171,18 @@ function(input, output, session) {
     rownames = FALSE
   )
 
-  # RNA expression plot
+  ### RNA expression plot
   output$RNA_exprs <- renderPlot({
-    gene_select <- input$gene
+    gene_select <- input$gene # Req. for sql
 
     expression_data()$RNA_exprs %>%
+      # Filter for specified gene
       dplyr::filter(GeneID == gene_select) %>%
       collect() %>%
       mutate(Group = factor(Group, levels = unique(Group))) %>%
       ggplot(aes(x = Group, y = CPM)) +
+        # Stat_summary for bar plot.
+        # if/else statements control fill aes based on input$RNA_exprs_anno
         {if (input$RNA_exprs_anno == "1") {
           stat_summary(
             aes(fill = Population), fun.y = mean, geom = "bar", col = "black")
@@ -210,15 +204,18 @@ function(input, output, session) {
           axis.text.x = element_text(angle = 45, vjust = 1, hjust = 1))
   })
 
-  # ATAC expression plot
+  ### ATAC expression plot
   output$ATAC_exprs <- renderPlot({
-    enhancer_select <- input$enhancer
+    enhancer_select <- input$enhancer # Req. for sql
 
     expression_data()$ATAC_exprs %>%
+      # Filter for specified enhancer
       dplyr::filter(peak_coord == enhancer_select) %>%
       collect() %>%
       mutate(Group = factor(Group, levels = unique(Group))) %>%
       ggplot(aes(x = Group, y = CPM)) +
+        # Stat_summary for bar plot.
+        # if/else statements control fill aes based on input$ATAC_exprs_anno
         {if (input$ATAC_exprs_anno == "1") {
           stat_summary(
             aes(fill = Population), fun.y = mean, geom = "bar", col = "black")
@@ -240,12 +237,14 @@ function(input, output, session) {
           axis.text.x = element_text(angle = 45, vjust = 1, hjust = 1))
   })
 
-  # RNA PCA plot
+  ### RNA PCA plot
   output$RNA_pca <- renderPlot({
     pca_res <- run_pca_rna()
     pca_res$rotation <- dplyr::filter(pca_res$rotation, GeneID == input$gene)
 
     ggplot(pca_res$x, aes(x = PC1, y = PC2)) +
+      # Stat_summary for bar plot.
+      # if/else statements control fill aes based on input$ATAC_exprs_anno
       {if (input$RNA_exprs_anno == "1") {
         geom_point(aes(col = Population), size = 3)
       }else if (input$RNA_exprs_anno == "2") {
@@ -253,6 +252,7 @@ function(input, output, session) {
       }else if (input$RNA_exprs_anno == "3") {
         geom_point(aes(col = Group), size = 3)
       }} +
+      # Plot loading contribution of selected gene
       geom_point(
         data = pca_res$rotation,
         mapping = aes(x = PC1 * 1000, y = PC2 * 1000),
@@ -278,6 +278,8 @@ function(input, output, session) {
       pca_res$rotation, peak_coord == input$enhancer)
 
     ggplot(pca_res$x, aes(x = PC1, y = PC2)) +
+      # Stat_summary for bar plot.
+      # if/else statements control fill aes based on input$ATAC_exprs_anno
       {if (input$ATAC_exprs_anno == "1") {
         geom_point(aes(col = Population), size = 3)
       }else if (input$ATAC_exprs_anno == "2") {
@@ -285,6 +287,7 @@ function(input, output, session) {
       }else if (input$ATAC_exprs_anno == "3") {
         geom_point(aes(col = Group), size = 3)
       }} +
+      # Plot loading contribution of selected gene
       geom_point(
         data = pca_res$rotation,
         mapping = aes(x = PC1 * 2000, y = PC2 * 2000),
@@ -303,20 +306,16 @@ function(input, output, session) {
       theme(text = element_text(size = font_size))
   })
 
-  # NETWORK PLOT
-
-  # Process network button
+  ### Execute GRN button
   grn_list <- eventReactive(input$makeGRN, {
 
-    # Set selected groups to variable. Required step, as
-    # SQL database queries don't recognise input variables.
+    # Setting input to variables for sql compatibility
     grn_subset <- unlist(input$grn_subset)
     grn_centrality <- unlist(input$grn_centrality)
     core_node <- unlist(input$core_node)
 
-    ### Init list
+    # Init list
     grn_list <- list()
-    node_filt <- "TF"
 
     # Init SQL tables
     edges <- tbl(sql_db, "GRN_edges")
@@ -331,16 +330,15 @@ function(input, output, session) {
       centrality <- filter(centrality, is_TF == 1)
     }
 
-    # Filter centrality stats
-    # Note: Need to collect early due to dbplyr bug
-    # (see https://github.com/tidyverse/dbplyr/issues/1206)
+    # Specify module/centrality column name
     col_select <- paste(grn_subset, grn_centrality, sep = "_")
 
+    # Filter centrality measures by module
     centrality <- centrality %>%
       filter(ifelse(grn_subset == "Full", TRUE, RNA_module == grn_subset)) %>%
       select_if(grepl(paste0(grn_subset, "|name|RNA_module"), names(.)))
 
-    # Process network modes
+    # Process network modes based on GRN mode
     if (input$grn_mode == "Central TFs") {
 
       # Filter for subset (RNA1-5 or full)
@@ -349,12 +347,15 @@ function(input, output, session) {
       edges <- filter(edges,
         to %in% !!pull(nodes, id) & from %in% !!pull(nodes, id))
 
+      # Get top-n central genes. Note: Need to collect before pull...
+      # due to dbplyr bug (see https://github.com/tidyverse/dbplyr/issues/1206)
       top_n_genes <- centrality %>%
         arrange(desc(.data[[col_select]])) %>%
         head(input$top_n_centrality) %>%
         collect() %>%
         pull(name)
 
+      # Centrality filter for nodes/edges
       nodes <- filter(nodes, id %in% top_n_genes) %>%
         left_join(centrality, by = c("id" = "name", "RNA_module"))
       edges <- filter(edges, to %in% top_n_genes & from %in% top_n_genes)
@@ -411,17 +412,15 @@ function(input, output, session) {
     grn_list$col_select <- col_select
     grn_list$plot_mode <- input$grn_mode
 
-
-    ### Return data
     return(grn_list)
 
   }, ignoreNULL = FALSE) # Allows processing on app startup
 
+  ### Render visNetwork
   output$mynetworkid <- renderVisNetwork({
 
-    # Render visNetwork
-
     visNetwork(grn_list()$nodes, grn_list()$edges) %>%
+
       # Node specification
       visNodes(
         font = list(size = 30),
@@ -454,6 +453,7 @@ function(input, output, session) {
 
   })
 
+  ### GRN download handler
   output$downGRN <- downloadHandler(
     filename = function() {
       "grn_interactions.csv"
@@ -463,6 +463,7 @@ function(input, output, session) {
     }
   )
 
+  ### GRN side plot (GRN mode dependent)
   output$networkSidePlot <- renderPlot({
 
     n <- grn_list()$nodes
@@ -471,6 +472,9 @@ function(input, output, session) {
     plot_mode <- grn_list()$plot_mode
 
     if (plot_mode == "Central TFs") {
+
+      # Plot top-central nodes
+
       net_topn <- n %>%
         select(id:RNA_module, Centrality = col_select) %>%
         top_n(20, Centrality) %>%
@@ -482,9 +486,13 @@ function(input, output, session) {
         xlab(gsub("_", " ", col_select))
 
     } else if (plot_mode == "Upstream") {
+
+      # Plot top-correlated nodes
+
       net_topn <- e %>%
         select(id = from, RNA_correlation) %>%
         left_join(n) %>%
+        # top_n top 20 or botton 20 based on input$corr_filt
         top_n(if (input$corr_filt == "Top-20 correlated") {
             20
           } else {
@@ -498,9 +506,13 @@ function(input, output, session) {
           xlab("RNA correlation")
 
     } else {
+
+      # Plot top-correlated nodes
+
       net_topn <- e %>%
         select(id = to, RNA_correlation) %>%
         left_join(n) %>%
+        # top_n top 20 or botton 20 based on input$corr_filt
         top_n(if (input$corr_filt == "Top-20 correlated") {
             20
           } else {
@@ -515,7 +527,8 @@ function(input, output, session) {
 
     }
 
-    net_topn_plot <- net_topn_plot +
+    # Add general ggplot functions
+    net_topn_plot +
       geom_point(pch = 21, size = 3) +
       scale_fill_manual(values = c(RNA1 = "yellow", RNA2 = "blue",
         RNA3 = "green", RNA4 = "orange", RNA5 = "red")) +
@@ -526,39 +539,43 @@ function(input, output, session) {
         legend.text = element_text(size = font_size - 2)) +
       guides(fill = guide_legend(ncol = 2))
 
-    return(net_topn_plot)
-
   })
 
-  # Cooperation expression plot
+  ### Cooperation expression plot
   output$coop_exprs <- renderPlot({
+
     tf_a <- input$TF_A
     tf_b <- input$TF_B
+
+    # Filter expression data
     exprs <- expression_data()$RNA_exprs %>%
       dplyr::filter(GeneID %in% c(tf_a, tf_b)) %>%
       collect() %>%
       mutate(Group = factor(Group, levels = unique(Group)))
 
-      ggplot(exprs, aes(x = Group, y = CPM, fill = GeneID)) +
-        stat_summary(fun.y = mean, geom = "bar", col = "black",
-          position = position_dodge()) +
-        stat_summary(fun.data = mean_se, geom = "errorbar", width = 0.2,
-          position = position_dodge(width = 0.9)) +
-        geom_point(position = position_jitterdodge(
-          jitter.width = 0.2, dodge.width = 0.9, seed = 12345)) +
-        ggtitle(paste0(tf_a, " and ", tf_b)) +
-        xlab("") +
-        theme_classic() +
-        theme(text = element_text(size = font_size),
-          axis.text.x = element_text(angle = 45, vjust = 1, hjust = 1))
+    # Plot expression of both TF A and B with position_dodge
+    ggplot(exprs, aes(x = Group, y = CPM, fill = GeneID)) +
+      stat_summary(fun.y = mean, geom = "bar", col = "black",
+        position = position_dodge()) +
+      stat_summary(fun.data = mean_se, geom = "errorbar", width = 0.2,
+        position = position_dodge(width = 0.9)) +
+      geom_point(position = position_jitterdodge(
+        jitter.width = 0.2, dodge.width = 0.9, seed = 12345)) +
+      ggtitle(paste0(tf_a, " and ", tf_b)) +
+      xlab("") +
+      theme_classic() +
+      theme(text = element_text(size = font_size),
+        axis.text.x = element_text(angle = 45, vjust = 1, hjust = 1))
   })
 
-  # Cooperation expression plot
+  ### Plot cointeraction statistics
   output$coop_top <- renderPlotly({
+
     tf_a <- input$TF_A
     tf_b <- input$TF_B
     module <- input$coop_subset
 
+    # If a module is selected, pull GeneID from GRN nodes table
     if (module != "All") {
       gene_filt <- tbl(sql_db, "GRN_nodes") %>%
         filter(RNA_module == module) %>%
@@ -568,16 +585,22 @@ function(input, output, session) {
         pull(id)
     }
 
-    # TF A selection must always be in filter
+    # Ensure TF A is always included in gene_filt
     gene_filt <- unique(c(tf_a, gene_filt))
 
+    # Pre-process cointeraction stats
+    # Slightly messy, as statistics table is non-redundant between TF_A and TF_B
     df <- coop_stats %>%
+      # Filter TF columns for gene_filt
       filter(TF_A %in% gene_filt & TF_B %in% gene_filt) %>%
+      # User specified tf_a must be included in either column
       filter(TF_A == tf_a | TF_B == tf_a) %>%
-      # Need to ensure label is the partner TF, not selected TF
+      # Need to ensure label is the partner TF (tf_b), not selected TF
+      # This is done by pasting A and B together; removing user-specified tf_a
       mutate(GeneID = paste0(TF_A, TF_B)) %>%
       mutate(GeneID = gsub(tf_a, "", GeneID))
 
+    # Plot cointeraction statistics
     p <- ggplot(df, aes(y = -log10(Cointeraction_Pvalue), x = RNA_correlation,
       label = GeneID)) +
       geom_point(pch = 21, fill = "#996cd4") +
@@ -590,7 +613,9 @@ function(input, output, session) {
       theme(text = element_text(size = font_size),
         axis.text.x = element_text(angle = 45, vjust = 1, hjust = 1))
 
+    # Convert ggplot object into plotly for enhancer interactivity
     ggplotly(p) %>%
+      # Need to adjust font size, as plotly does not inherit from ggplot
       layout(
         xaxis = list(
           title = list(font = list(size = font_size)),
@@ -601,26 +626,19 @@ function(input, output, session) {
 
   })
 
-  # Cointeraction stats table
+  ### Cointeraction stats table
   output$coop_stats_tbl <- DT::renderDataTable(
     coop_stats,
     options = list(
-      paging = TRUE,    ## paginate the output
-      pageLength = 10,  ## number of rows to output for each page
+      paging = TRUE,
+      pageLength = 10,
       lengthMenu = c(10, 50, 100),
-      scrollX = TRUE,   ## enable scrolling on X axis
-      scrollY = TRUE,   ## enable scrolling on Y axis
-      autoWidth = TRUE, ## use smart column width handling
-      server = TRUE,   ## use client-side processing
-      dom = "lfrtiBp", # Alternative: dom = "Bfrtlip"
-      buttons = c("csv", "excel"),
-      formatter = list(
-        `E8-EC_E8-preHE_FDR` = p_formatter,
-        `E8-preHE_E9-HE_FDR` = p_formatter,
-        `E9-HE_E9-proHSC_FDR` = p_formatter,
-        `E9-proHSC_E10-preI_FDR` = p_formatter,
-        `E10-preI_E10-preII_FDR` = p_formatter
-      )
+      scrollX = TRUE,
+      scrollY = TRUE,
+      autoWidth = TRUE,
+      server = TRUE,
+      dom = "lfrtiBp",
+      buttons = c("csv", "excel")
     ),
     extensions = "Buttons",
     selection = "single",
@@ -628,16 +646,15 @@ function(input, output, session) {
     rownames = FALSE
   )
 
-  # Cointeraction stats table
-
+  ### Reactive filter network for TF_A and TF_B targets
   coop_target_tbl <- reactive({
-
     tf_a <- input$TF_A
     tf_b <- input$TF_B
     nodes <- tbl(sql_db, "GRN_nodes") %>%
       select(GeneID = id, RNA_module) %>%
       collect()
 
+    # Establish TF_A/B seperate targets
     tf_a_targets <- tbl(sql_db, "GRN_edges") %>%
       filter(from == tf_a) %>%
       pull(to)
@@ -645,8 +662,10 @@ function(input, output, session) {
       filter(from == tf_b) %>%
       pull(to)
 
+    # Specify A+B joint targets
     joint_targets <- intersect(tf_a_targets, tf_b_targets)
 
+    # Create A+B targets edge table with RNA correlation
     tf_a_target_tbl <- tbl(sql_db, "GRN_edges") %>%
       filter(to %in% joint_targets & from == tf_a) %>%
       select(to, RNA_correlation) %>%
@@ -665,32 +684,23 @@ function(input, output, session) {
 
   })
 
+  ### TF A + B joint targets table
   output$coop_target_tbl <- DT::renderDataTable(
     coop_target_tbl(),
     options = list(
-      paging = TRUE,    ## paginate the output
-      pageLength = 10,  ## number of rows to output for each page
+      paging = TRUE,
+      pageLength = 10,
       lengthMenu = c(10, 50, 100),
-      scrollX = TRUE,   ## enable scrolling on X axis
-      scrollY = TRUE,   ## enable scrolling on Y axis
-      autoWidth = TRUE, ## use smart column width handling
-      server = TRUE,   ## use client-side processing
-      dom = "lfrtiBp", # Alternative: dom = "Bfrtlip"
-      buttons = c("csv", "excel"),
-      formatter = list(
-        `E8-EC_E8-preHE_FDR` = p_formatter,
-        `E8-preHE_E9-HE_FDR` = p_formatter,
-        `E9-HE_E9-proHSC_FDR` = p_formatter,
-        `E9-proHSC_E10-preI_FDR` = p_formatter,
-        `E10-preI_E10-preII_FDR` = p_formatter
-      )
+      scrollX = TRUE,
+      scrollY = TRUE,
+      autoWidth = TRUE,
+      server = TRUE,
+      dom = "lfrtiBp",
+      buttons = c("csv", "excel")
     ),
     extensions = "Buttons",
     selection = "single",
     filter = "top",
     rownames = FALSE
   )
-
-
-
 }

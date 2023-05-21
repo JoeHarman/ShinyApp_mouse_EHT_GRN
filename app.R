@@ -18,7 +18,7 @@ library(visNetwork)
 library(igraph)
 library(plotly)
 
-# Use if file exists = F
+### Retrieve data from figshare
 if (!file.exists("./data/import.zip")) {
   download.file(
     url = "https://figshare.com/ndownloader/articles/22905005/versions/1",
@@ -26,30 +26,28 @@ if (!file.exists("./data/import.zip")) {
   unzip("./data/import.zip", exdir = "data")
 }
 
-# Source functions
+### Source functions
 source("./logic_scripts/functions.R")
 
-# Read in data
+### Read in data
 ATAC_stats <- readRDS("./data/ATAC_stats.rds")
 RNA_stats <- readRDS("./data/RNA_stats.rds")
 RNA_anno <- readRDS("./data/RNA_anno.rds")
 ATAC_anno <- readRDS("./data/ATAC_anno.rds")
-
 pca_tables <- readRDS("./data/PCA_tables.rds")
-
 coop_stats <- readRDS("./data/Cointeraction_stats.rds")
 
+### Connect to SQLite database
 sql_db <- DBI::dbConnect(RSQLite::SQLite(),
   dbname = "./data/RNA_ATAC_expression_and_GRN_tables.sqlite")
 
-# Useful variables
-
+### Useful variables
 samples <- as.character(unique(RNA_anno$Group))
-names(samples) <- samples
 deg <- as.character(RNA_stats$GeneID)
 dae <- as.character(ATAC_stats$peak_coord)
+font_size <- 15
 
-# Colour schemes
+### Colour schemes
 col_scheme <- list(
   Population = c(EC = "#4444c0", HE = "#53bf53",
     proHSC = "#daa84c", preI = "#c34747", preII = "#843b3b"),
@@ -58,7 +56,7 @@ col_scheme <- list(
 )
 names(col_scheme$Group) <- unique(pull(tbl(sql_db, "RNA_exprs"), Group))
 
-# Text
+### Text
 about_txt <- read_file("./Text/about.txt")
 help1 <- read_file("./Text/help-1.txt")
 help2 <- read_file("./Text/help-2.txt")
@@ -66,9 +64,6 @@ help3 <- read_file("./Text/help-3.txt")
 help4 <- read_file("./Text/help-4.txt")
 tooltips <- read_tsv("Text/tooltips.txt", col_names = FALSE, comment = "#") %>%
   unlist()
-
-# Parameters
-font_size <- 15
 
 # Load ui and server scripts
 ui <- source("./logic_scripts/ui_logic.R",  local = TRUE)$value
