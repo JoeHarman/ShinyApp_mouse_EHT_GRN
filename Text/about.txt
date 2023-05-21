@@ -1,10 +1,8 @@
 <right><img src="model.png" width="40%" style="float: right; padding: 20px 20px 20px 20px;"></right>
 <header>
-    <h2>About this application</h2>
+    <h3>About this application</h3>
     <br>
-    <p>This Shiny app was designed to accompany the publication [[link]], and offers a user interface to browse the related datasets as well as a gene regulatory network (GRN) model of EHT. Please use the tabs above to navigate the different datasets available.</p>
-
-    <p>Instructions are available using the buttons in the left sidebar.</p>
+    <p>This Shiny app was designed to accompany the publication [[link]], and offers a user interface to browse the related datasets as well as a gene regulatory network (GRN) model of EHT. Please use the tabs above to navigate the different datasets available. Instructions are available using the buttons in the left sidebar.</p>
 
     <p>ATACseq coverage tracks can be explored on <a href="https://genome-euro.ucsc.edu/s/JoeHarman/Harman_2023_EHT_ATACseq" target="_blank">UCSC</a>.</p>
     <p>Code to build this app is available on <a href="https://github.com/JoeHarman/ShinyApp_EHT-GRN" target="_blank">github</a>.</p>
