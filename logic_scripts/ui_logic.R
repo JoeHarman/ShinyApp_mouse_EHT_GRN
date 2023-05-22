@@ -242,13 +242,13 @@ ui <- fluidPage(theme = shinytheme("flatly"),
         fluidRow(
           ### Plot network with visNetwork
           column(9, h3("Network"),
-            visNetworkOutput("mynetworkid", height = "70vh") %>%
+            visNetworkOutput("mynetworkid", height = "60vh") %>%
               withSpinner(type = 5, color = "#0dc5c1")
           ),
 
           ### Side plot (differs by GRN mode)
           column(3, h3("Top nodes"),
-            plotOutput("networkSidePlot", height = "70vh") %>%
+            plotOutput("networkSidePlot", height = "60vh") %>%
               withSpinner(type = 5, color = "#0dc5c1")
           )
         )
