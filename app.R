@@ -62,7 +62,8 @@ help1 <- read_file("./Text/help-1.txt")
 help2 <- read_file("./Text/help-2.txt")
 help3 <- read_file("./Text/help-3.txt")
 help4 <- read_file("./Text/help-4.txt")
-tooltips <- read_tsv("Text/tooltips.txt", col_names = FALSE, comment = "#") %>%
+tooltips <- read_tsv("Text/tooltips.txt", col_names = FALSE, comment = "#",
+  show_col_types = FALSE) %>%
   unlist()
 
 # Load ui and server scripts

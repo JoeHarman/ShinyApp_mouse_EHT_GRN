@@ -153,7 +153,6 @@ function(input, output, session) {
   ### ATAC statistics DataTable
   output$ATAC_stats_tbl <- DT::renderDataTable(
     ATAC_stats,
-    server = FALSE,
     options = list(
       paging = TRUE,
       pageLength = 10,
