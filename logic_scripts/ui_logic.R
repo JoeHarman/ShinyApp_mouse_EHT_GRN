@@ -149,27 +149,35 @@ ui <- fluidPage(theme = shinytheme("flatly"),
         )
       ),
 
-      ### ATAC panel code ###
+      ### Network panel code ###
       tabPanel("Network",
 
         # Annotations row
         wellPanel(fluidRow(
 
           ### GRN mode/execute buttons
-          column(3,
+          column(1,
             # Execute GRN code
-            actionButton(inputId = "makeGRN", label = "Make GRN"),
-            # Download GRN
-            downloadButton("downGRN", "Export"),
+            actionBttn(inputId = "makeGRN", label = "Make GRN", style = "pill",
+              size = "sm", color = "success", block = TRUE),
             br(),
+            br(),
+            # Download GRN
+            downloadBttn("downGRN", "Export", style = "pill", color = "primary",
+              size = "sm", block = TRUE),
+            br(),
+            bsTooltip("makeGRN", tooltips[18])
+          ),
+          ### GRN mode/execute buttons
+          column(2,
             # Select plot mode
-            radioGroupButtons(inputId = "grn_mode", label = "Plot mode:",
-              choices = c("Central TFs", "Upstream", "Downstream")),
+            radioGroupButtons(inputId = "grn_mode", label = NULL,
+              choices = c("Central TFs", "Upstream", "Downstream"),
+              direction = "vertical", justified = TRUE, status = "info"),
             # Tooltips
             radioTooltip("grn_mode", "Central TFs", tooltips[15]),
             radioTooltip("grn_mode", "Upstream", tooltips[16]),
-            radioTooltip("grn_mode", "Downstream", tooltips[17]),
-            bsTooltip("makeGRN", tooltips[18])
+            radioTooltip("grn_mode", "Downstream", tooltips[17])
           ),
 
           ### GRN subset options
@@ -202,7 +210,7 @@ ui <- fluidPage(theme = shinytheme("flatly"),
             # Top-n central nodes to plot
             sliderInput("top_n_centrality",
               "# top-most central:",
-              min = 1, max = 316, value = 25),
+              min = 1, max = 316, value = 25, ticks = FALSE),
 
             # Method of centrality calculation
             radioButtons(
@@ -235,7 +243,8 @@ ui <- fluidPage(theme = shinytheme("flatly"),
             # Side-plot options - top correlated or anti-correlated
             radioGroupButtons(inputId = "corr_filt",
               label = "Side plot options:",
-              choices = c("Top-20 correlated", "Top-20 anti-correlated"))
+              choices = c("Correlated", "Anti-correlated"),
+              justified = TRUE, status = "info")
           )
         )),
 

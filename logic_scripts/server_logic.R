@@ -45,7 +45,6 @@ function(input, output, session) {
 
     # If samples are set to default, load pre-calculated PCA results
     if (identical(selected_groups, samples[c(1, 2, 4, 5, 8, 9)])) {
-      print("Works")
       return(pca_tables$RNA)
     }
 
@@ -487,12 +486,12 @@ function(input, output, session) {
     } else if (plot_mode == "Upstream") {
 
       # Plot top-correlated nodes
-
+      print(input$corr_filt)
       net_topn <- e %>%
         select(id = from, RNA_correlation) %>%
         left_join(n) %>%
         # top_n top 20 or botton 20 based on input$corr_filt
-        top_n(if (input$corr_filt == "Top-20 correlated") {
+        top_n(if (input$corr_filt == "Correlated") {
             20
           } else {
             -20
@@ -512,7 +511,7 @@ function(input, output, session) {
         select(id = to, RNA_correlation) %>%
         left_join(n) %>%
         # top_n top 20 or botton 20 based on input$corr_filt
-        top_n(if (input$corr_filt == "Top-20 correlated") {
+        top_n(if (input$corr_filt == "Correlated") {
             20
           } else {
             -20
