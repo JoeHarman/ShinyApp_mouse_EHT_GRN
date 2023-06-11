@@ -1,6 +1,7 @@
 ui <- fluidPage(theme = shinytheme("flatly"),
 
-  titlePanel("Gene regulatory network analysis of embryonic mouse EHT"),
+  titlePanel("Gene regulatory network analysis of the 
+    mouse endothelial-to-hematopoietic transition (EHT)"),
 
   sidebarLayout(
 
