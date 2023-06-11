@@ -2,11 +2,11 @@
 <header>
     <h3>About this application</h3>
     <br>
-    <p>This Shiny app was designed to accompany the publication [[link]], and offers a user interface to browse the related datasets as well as a gene regulatory network (GRN) model of EHT. Please use the tabs above to navigate the different datasets available. Instructions are available using the buttons in the left sidebar.</p>
+    <p>This Shiny app was designed to accompany the publication [[link to follow]], and offers a user interface to browse the related datasets as well as a gene regulatory network (GRN) model of EHT. Please use the tabs above to navigate the different datasets available. Instructions are available using the buttons in the left sidebar.</p>
 
     <p>ATACseq coverage tracks can be explored on <a href="https://genome-euro.ucsc.edu/s/JoeHarman/Harman_2023_EHT_ATACseq" target="_blank">UCSC</a>.</p>
     <p>Code to build this app is available on <a href="https://github.com/JoeHarman/ShinyApp_EHT-GRN" target="_blank">github</a>.</p>
-    <p>Processed datasets used in this app are available on figshare: DOI <a href="https://doi.org/10.6084/m9.figshare.22905005.v1" target="_blank">DOI: 10.6084/m9.figshare.22905005.v1</a></p>
+    <p>Processed datasets used in this app are available on figshare: DOI <a href="https://doi.org/10.6084/m9.figshare.22905005.v1" target="_blank">10.6084/m9.figshare.22905005.v1</a></p>
     <p>Raw sequencing data can be downloaded from GEO: <a href="https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE233057" target="_blank">GSE233057</a>.</p>
     <p>The app was designed by Joe Harman  (<a href="https://orcid.org/0000-0003-3668-1859" target="_blank">orcid 0000-0003-3668-1859</a>).</p>
 </header>
@@ -14,8 +14,16 @@
 <hr style="height:2px;border-width:0;color:gray;background-color:gray">
 <br>
 
-<p>These data consist of mini-bulk RNA-seq and ATAC-seq analyses for embryonic mouse EHT populations. These consisted of E8.5 to E10.5 embryos, on endothelial cells (EC), hemogenic endothelium (HE), pro-HSC, and pre-HSC type I and type II. Samples used in the publication, and upon which statistics were calculated, consisted of E8.5 EC, E8.5 HE, E9.5 HE, E9.5 pro-HSC, E10.5 pre-HSC type I, and E10.5 pre-HSC type II.</p>
+<p>The data in this app consist of mini-bulk RNA-seq (100 cells per sample) and ATAC-seq (1500 cells per sample) analyses of mouse EHT populations. Samples were isolated from the E8.5 and E9.5 para-aortic splanchnopleura (PAS) with vitelline/umbilical arteries (VU) and the E10.5 aorta-gonad-mesonephros (AGM) + VU, and include:</p>
+<ul>
+<li>E8.5 to E10.5 endothelial cells (EC)</li>
+<li>E8.5 to E10.5 hemogenic endothelium (HE)</li>
+<li>E9.5 pro-HSC/HPCs</li>
+<li>E10.5 pre-HSC type I and type II</li>
+</ul>
 
-<p>The GRN model describing EHT was generated through annotating differentially accessible ATAC-seq peaks to differentially expressed genes (RNA-seq), then connecting gene expression to upstream regulators via motif analysis of the cis-regulatory elements. These links were robustly filtered using correlative measures. Please see publication for details. Further, the network was divided into different modules based on gene expression patterns (see figure). This resulting network can be explored using the network tab, above.</p>
+<p>Samples used for the EHT trajectory reported in the accompanying manuscript, and upon which the differential expression analysis statistics were calculated, include the E8.5 EC, E8.5 HE, E9.5 HE, E9.5 pro-HSC/HPC, E10.5 pre-HSC type I, and E10.5 pre-HSC type II (see figure above and the instructions related to RNA tab).</p>
 
-<p>Please direct any questions regarding this website to: [[which e-mail?]].</p>
+<p>The GRN model describing this EHT trajectory was generated through annotating differentially accessible ATAC-seq peaks to differentially expressed genes (RNA-seq), then connecting gene expression to upstream regulators via motif analysis of the cis-regulatory elements. These links were robustly filtered using correlative measures. Please see publication for details. Further, the network was divided into different modules based on gene expression patterns (see figure above). This resulting network can be explored using the network tab.</p>
+
+<p>Please direct any questions regarding this website to: <a href = "mailto: marella.debruijn@imm.ox.ac.uk">marella.debruijn@imm.ox.ac.uk</a></p>
