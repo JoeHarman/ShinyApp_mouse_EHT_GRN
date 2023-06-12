@@ -15,13 +15,13 @@ Number of most-central nodes to plot
 # 8 grn_subset - Full
 Full network
 # 9 grn_subset - RNA1
-Transient HE/pro-HSC depleted
+Transient HE/pro-HSC(HPC) depleted
 # 10 grn_subset - RNA2
 Endothelial expression
 # 11 grn_subset - RNA3
-Transient HE/pro-HSC enriched
+Transient HE/pro-HSC(HPC) enriched
 # 12 grn_subset - RNA4
-Early haematopoietic specification (upregulated in pro-HSC)
+Early haematopoietic specification (upregulated in pro-HSC/HPC)
 # 13 grn_subset - RNA5
 late haematopoietic specification (upregulated in pre-HSC I/II)
 # 14 grn_tf

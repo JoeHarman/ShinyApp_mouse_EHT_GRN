@@ -1,4 +1,4 @@
-The RNA-seq analysis consists of EHT populations from E8.5, E9.5 and E10.5 mouse embryos. Statistics were performed on a specific panel of samples: E8.5 EC, E8.5 HE, E9.5 HE, E9.5 pro-HSC, E10.5 pre-HSC type I, and E10.5 pre-HSC type II. 
+The RNA-seq analysis consists of EHT populations from E8.5, E9.5 and E10.5 mouse embryos. Statistics were performed on a specific panel of samples: E8.5 EC, E8.5 HE, E9.5 HE, E9.5 pro-HSC/HPC, E10.5 pre-HSC type I, and E10.5 pre-HSC type II. 
 <br>
 <br>
 These data can be navigated as follows:

@@ -177,6 +177,9 @@ function(input, output, session) {
       # Filter for specified gene
       dplyr::filter(GeneID == gene_select) %>%
       collect() %>%
+      mutate(Group = replace(Group, Group == "E9_proHSC", "E9_proHSC/HPC")) %>%
+      mutate(Population = replace(
+        Population, Population == "proHSC", "proHSC/HPC")) %>%
       mutate(Group = factor(Group, levels = unique(Group))) %>%
       ggplot(aes(x = Group, y = CPM)) +
         # Stat_summary for bar plot.
@@ -210,6 +213,9 @@ function(input, output, session) {
       # Filter for specified enhancer
       dplyr::filter(peak_coord == enhancer_select) %>%
       collect() %>%
+      mutate(Group = replace(Group, Group == "E9_proHSC", "E9_proHSC/HPC")) %>%
+      mutate(Population = replace(
+        Population, Population == "proHSC", "proHSC/HPC")) %>%
       mutate(Group = factor(Group, levels = unique(Group))) %>%
       ggplot(aes(x = Group, y = CPM)) +
         # Stat_summary for bar plot.
@@ -239,6 +245,15 @@ function(input, output, session) {
   output$RNA_pca <- renderPlot({
     pca_res <- run_pca_rna()
     pca_res$rotation <- dplyr::filter(pca_res$rotation, GeneID == input$gene)
+
+    pca_res$x <- pca_res$x %>%
+      mutate(
+        Group = as.character(Group),
+        Population = as.character(Population)) %>%
+      mutate(Group = replace(
+        Group, Group == "E9_proHSC", "E9_proHSC/HPC")) %>%
+      mutate(Population = replace(
+        Population, Population == "proHSC", "proHSC/HPC"))
 
     ggplot(pca_res$x, aes(x = PC1, y = PC2)) +
       # Stat_summary for bar plot.
@@ -274,6 +289,15 @@ function(input, output, session) {
     pca_res <- run_pca_atac()
     pca_res$rotation <- dplyr::filter(
       pca_res$rotation, peak_coord == input$enhancer)
+
+    pca_res$x <- pca_res$x %>% 
+      mutate(
+        Group = as.character(Group),
+        Population = as.character(Population)) %>%
+      mutate(Group = replace(
+        Group, Group == "E9_proHSC", "E9_proHSC/HPC")) %>%
+      mutate(Population = replace(
+        Population, Population == "proHSC", "proHSC/HPC"))
 
     ggplot(pca_res$x, aes(x = PC1, y = PC2)) +
       # Stat_summary for bar plot.
@@ -549,6 +573,9 @@ function(input, output, session) {
     exprs <- expression_data()$RNA_exprs %>%
       dplyr::filter(GeneID %in% c(tf_a, tf_b)) %>%
       collect() %>%
+      mutate(Group = replace(Group, Group == "E9_proHSC", "E9_proHSC/HPC")) %>%
+      mutate(Population = replace(
+        Population, Population == "proHSC", "proHSC/HPC")) %>%
       mutate(Group = factor(Group, levels = unique(Group)))
 
     # Plot expression of both TF A and B with position_dodge

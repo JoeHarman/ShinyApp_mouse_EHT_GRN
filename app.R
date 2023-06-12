@@ -50,7 +50,7 @@ font_size <- 15
 ### Colour schemes
 col_scheme <- list(
   Population = c(EC = "#4444c0", HE = "#53bf53",
-    proHSC = "#daa84c", preI = "#c34747", preII = "#843b3b"),
+    `proHSC/HPC` = "#daa84c", preI = "#c34747", preII = "#843b3b"),
   Stage = c(E8 = "#4444c0", E9 = "#53bf53", E10 = "#c34747"),
   Group = gg_color_hue(length(unique(pull(tbl(sql_db, "RNA_exprs"), Group))))
 )

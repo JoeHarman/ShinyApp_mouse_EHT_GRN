@@ -8,8 +8,11 @@ ui <- fluidPage(theme = shinytheme("flatly"),
     ##### SIDE BAR CODE #####
     sidebarPanel(
       ### Selecting samples for RNA/ATAC exprs plots
-      checkboxGroupInput("select_groups", "Samples to plot:", samples,
-        selected = samples[c(1, 2, 4, 5, 8, 9)]),
+      checkboxGroupInput("select_groups", "Samples to plot:",
+      list("E8_EC", "E8_HE", "E9_EC", "E9_HE", "E9_proHSC/HPC" = "E9_proHSC",
+        "E10_EC", "E10_HE", "E10_preI", "E10_preII"),
+        selected = list("E8_EC", "E8_HE", "E9_HE", "E9_proHSC",
+        "E10_preI", "E10_preII")),
       br(),
 
       ### Instructions buttons
