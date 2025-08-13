@@ -1,6 +1,8 @@
 # ShinyApp_EHT-GRN
 
-This is a Shiny App code to accompany the publication [[publication reference & link]]. This app offers a user interface to browse the related datasets as well as a gene regulatory network (GRN) model of EHT. A running version of this app is available at [[link]], and can be run locally.
+This is a Shiny App code to accompany the publication [[publication reference & link]]. This app offers a user interface to browse the related datasets as well as a gene regulatory network (GRN) model of EHT. 
+
+This app is no longer hosted on a server. Code may be downloaded for local operation.
 
 Shiny app code author: Joe Harman
 
